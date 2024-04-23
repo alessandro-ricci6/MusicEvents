@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -23,6 +24,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,13 +46,41 @@ import com.example.musicevents.data.database.Event
 
 @Composable
 fun HomeScreen(){
-    LazyColumn(
-        modifier = Modifier.padding(15.dp)
-    ) {
-        items(15) { index ->
-            EventItem(item = Event(id=index, name="I-Days", venue="Milan", performer="Bring me the horizon", date="07/08/2024"))
+    Column {
+        SearchBar()
+        LazyColumn(
+            modifier = Modifier.padding(10.dp)
+        ) {
+            items(15) { index ->
+                EventItem(item = Event(id=index, name="I-Days", venue="Milan", performer="Bring me the horizon", date="07/08/2024"))
+            }
         }
     }
+}
+
+@Composable
+fun SearchBar(){
+    var searchInput by remember { mutableStateOf("") }
+    val searchBtn = @Composable {
+        IconButton(
+            onClick = {
+                { /* TODO */ }
+            },
+        ) {
+            Icon(
+                Icons.Default.Search,
+                contentDescription = "",
+                tint = Color.Black
+            )
+        }
+    }
+    TextField(value = searchInput,
+        onValueChange = { searchInput = it },
+        modifier = Modifier
+            .padding(10.dp)
+            .fillMaxWidth(),
+        trailingIcon = searchBtn
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
