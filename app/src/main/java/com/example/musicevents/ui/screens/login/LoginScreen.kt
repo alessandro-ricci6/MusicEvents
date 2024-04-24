@@ -26,25 +26,31 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.musicevents.R
+import com.example.musicevents.ui.MusicEventsRoute
 import com.example.musicevents.ui.screens.login.LoginViewModel
 
 @Composable
-fun LoginScreen(){
+fun LoginScreen(
+    navHostController: NavHostController
+){
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .padding(20.dp)
             .fillMaxSize()
     ) {
-        LoginDiv()
+        LoginDiv(navHostController)
         RegisterScreen()
 
     }
 }
 
 @Composable
-fun LoginDiv(){
+fun LoginDiv(
+    navController: NavHostController,
+){
     var name by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -82,7 +88,7 @@ fun LoginDiv(){
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
     )
     Button(onClick = {
-
+        navController.navigate(MusicEventsRoute.Home.route)
         resultText = if(LoginViewModel().onLoginClick(name, password))"Hello $name" else "Try again"
     }) {
         Text(text = "Login")
