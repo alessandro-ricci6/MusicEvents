@@ -18,6 +18,7 @@ materialIconsExtended = "2024.04.00"
 navigationCommonKtx = "2.7.7"
 navigationCompose = "2.7.7"
 navigationRuntimeKtx = "2.7.7"
+playServicesLocation = "21.2.0"
 roomRuntime = "2.6.1"
 constraintlayoutCompose = "1.0.1"
 volley = "1.2.1"
@@ -51,6 +52,7 @@ ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negoti
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientCore" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktorClientOkhttp" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorSerializationKotlinxJson" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 volley = { module = "com.android.volley:volley", version.ref = "volley" }
 
 [plugins]
