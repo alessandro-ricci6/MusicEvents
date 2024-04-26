@@ -48,9 +48,6 @@ import coil.compose.AsyncImage
 import com.example.musicevents.data.remote.Event
 import com.example.musicevents.data.remote.JamBaseResponse
 import com.example.musicevents.data.remote.JambaseSource
-import com.example.musicevents.utils.LocationService
-import com.example.musicevents.utils.PermissionStatus
-import com.example.musicevents.utils.rememberPermission
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 

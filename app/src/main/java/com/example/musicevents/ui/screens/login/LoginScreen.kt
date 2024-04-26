@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -29,11 +28,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.musicevents.R
 import com.example.musicevents.ui.MusicEventsRoute
-import com.example.musicevents.ui.screens.login.LoginViewModel
 
 @Composable
 fun LoginScreen(
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    state: UserState,
+    actions: LoginActions
 ){
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -41,8 +41,8 @@ fun LoginScreen(
             .padding(20.dp)
             .fillMaxSize()
     ) {
-        LoginDiv(navHostController)
-        RegisterScreen()
+        LoginDiv(navHostController, state, actions)
+        RegisterScreen(navHostController, state, actions)
 
     }
 }
@@ -50,8 +50,10 @@ fun LoginScreen(
 @Composable
 fun LoginDiv(
     navController: NavHostController,
+    state: UserState,
+    actions: LoginActions
 ){
-    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var resultText by remember { mutableStateOf("") }
@@ -70,11 +72,11 @@ fun LoginDiv(
         }
     }
     Text(text = "Login", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-    TextField(value = name,
-        onValueChange = { name = it },
+    TextField(value = email,
+        onValueChange = { email = it },
         modifier = Modifier
             .padding(top = 30.dp),
-        label = {Text(text = "Name")})
+        label = {Text(text = "Email")})
     TextField(
         value = password,
         modifier = Modifier
@@ -88,8 +90,14 @@ fun LoginDiv(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
     )
     Button(onClick = {
-        navController.navigate(MusicEventsRoute.Home.route)
-        resultText = if(LoginViewModel().onLoginClick(name, password))"Hello $name" else "Try again"
+        if (actions.onLoginClick(email, password, state.users)){
+            navController.navigate(MusicEventsRoute.Home.route)
+        } else {
+            state.users.forEach{user ->
+                resultText += "${user.email} - ${user.password}\n"
+            }
+        }
+        //resultText = if(LoginViewModel().onLoginClick(name, password))"Hello $name" else "Try again"
     }) {
         Text(text = "Login")
     }
@@ -97,7 +105,11 @@ fun LoginDiv(
 }
 
 @Composable
-fun RegisterScreen(){
+fun RegisterScreen(
+    navController: NavHostController,
+    state: UserState,
+    actions: LoginActions
+){
     var email by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -142,7 +154,13 @@ fun RegisterScreen(){
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
     )
     Button(onClick = {
-        resultText = if(LoginViewModel().onRegisterClick(name, password, email)) "Hello $email" else "Try again"
+        if(actions.onRegisterClick(name, password, email, state.users)){
+            navController.navigate(MusicEventsRoute.Home.route)
+        } else {
+            resultText = "User yet registered"
+        }
+
+        //resultText = if(LoginViewModel().onRegisterClick(name, password, email)) "Hello $email" else "Try again"
     }) {
         Text(text = "Register")
     }

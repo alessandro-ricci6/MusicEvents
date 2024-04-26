@@ -1,14 +1,16 @@
 package com.example.musicevents.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.musicevents.MainActivity
 import com.example.musicevents.ui.screens.home.HomeScreen
 import com.example.musicevents.ui.screens.login.LoginScreen
+import com.example.musicevents.ui.screens.login.LoginViewModel
 import org.koin.androidx.compose.koinViewModel
 
 sealed class MusicEventsRoute(
@@ -47,7 +49,9 @@ fun MusicEventsNavGraph(
         }
         with(MusicEventsRoute.Login) {
             composable(route) {
-                LoginScreen(navController)
+                val loginVm = koinViewModel<LoginViewModel>()
+                val userState by loginVm.state.collectAsStateWithLifecycle()
+                LoginScreen(navController, userState, loginVm.actions)
             }
         }
     }
