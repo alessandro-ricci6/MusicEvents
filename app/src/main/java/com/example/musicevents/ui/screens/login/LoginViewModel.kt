@@ -5,22 +5,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.example.musicevents.data.database.User
 import com.example.musicevents.data.repositories.UserRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class UserState(val users: List<User>)
-data class UserLogged(val email: String)
+data class UserLogged(val id: Int?)
 
 interface LoginActions {
     fun onLoginClick(email: String, pass: String, users: List<User>): Boolean
@@ -36,17 +32,17 @@ class LoginViewModel (
         initialValue = UserState(emptyList())
     )
 
-    var userLogged by mutableStateOf(UserLogged(""))
+    var userLogged by mutableStateOf(UserLogged(null))
         private set
 
-    fun setUser(email: String){
-        userLogged = UserLogged(email)
-        viewModelScope.launch { userRepository.setUser(email) }
+    fun setUser(id: Int){
+        userLogged = UserLogged(id)
+        viewModelScope.launch { userRepository.setUser(id) }
     }
 
     init {
         viewModelScope.launch{
-            userLogged = UserLogged(userRepository.email.first())
+            userLogged = UserLogged(userRepository.id.first())
         }
     }
 
@@ -55,8 +51,8 @@ class LoginViewModel (
         override fun onLoginClick(email: String, pass: String, users: List<User>): Boolean {
             users.forEach{user ->
                 if (user.email == email && user.password == pass){
-                    setUser(email)
-                    Log.d("USERLOGGED", userLogged.email)
+                    setUser(user.id)
+                    Log.d("USERLOGGED", userLogged.id.toString())
                     return true
                 }
             }

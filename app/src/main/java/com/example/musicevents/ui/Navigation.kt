@@ -42,7 +42,7 @@ fun MusicEventsNavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = if (loginVm.userLogged.email.isNotBlank()) MusicEventsRoute.Home.route else MusicEventsRoute.Login.route,
+        startDestination = if (loginVm.userLogged.id != null) MusicEventsRoute.Home.route else MusicEventsRoute.Login.route,
         modifier = modifier
     ){
         with(MusicEventsRoute.Home) {
@@ -52,7 +52,6 @@ fun MusicEventsNavGraph(
         }
         with(MusicEventsRoute.Login) {
             composable(route) {
-                Log.d("INITUSER", loginVm.userLogged.email)
                 LoginScreen(navController, userState, loginVm.actions)
             }
         }

@@ -9,6 +9,7 @@ import com.example.musicevents.data.database.UserDAO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.intPreferencesKey
 
 
 class UserRepository(
@@ -18,12 +19,12 @@ class UserRepository(
 ) {
 
     companion object {
-        private val USERNAME_KEY = stringPreferencesKey("email")
+        private val USER_ID = intPreferencesKey("id")
     }
 
-    val email = dataStore.data.map { it[USERNAME_KEY] ?: "" }
+    val id = dataStore.data.map { it[USER_ID] }
 
-    suspend fun setUser(value: String) = dataStore.edit { it[USERNAME_KEY] = value }
+    suspend fun setUser(id: Int) = dataStore.edit { it[USER_ID] = id }
 
     val users: Flow<List<User>> = userDAO.getAllUser()
 
