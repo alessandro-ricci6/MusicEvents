@@ -1,5 +1,6 @@
 package com.example.musicevents.ui
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -36,10 +37,12 @@ fun MusicEventsNavGraph(
 ) {
     //val placesVm = koinViewModel<PlacesViewModel>()
     //val placesState by placesVm.state.collectAsStateWithLifecycle()
+    val loginVm = koinViewModel<LoginViewModel>()
+    val userState by loginVm.state.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
-        startDestination = MusicEventsRoute.Login.route,
+        startDestination = if (loginVm.userLogged.email.isNotBlank()) MusicEventsRoute.Home.route else MusicEventsRoute.Login.route,
         modifier = modifier
     ){
         with(MusicEventsRoute.Home) {
@@ -49,8 +52,7 @@ fun MusicEventsNavGraph(
         }
         with(MusicEventsRoute.Login) {
             composable(route) {
-                val loginVm = koinViewModel<LoginViewModel>()
-                val userState by loginVm.state.collectAsStateWithLifecycle()
+                Log.d("INITUSER", loginVm.userLogged.email)
                 LoginScreen(navController, userState, loginVm.actions)
             }
         }

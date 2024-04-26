@@ -86,7 +86,8 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
     //Location
     implementation(libs.play.services.location)
-
+    //DataStore
+    implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
