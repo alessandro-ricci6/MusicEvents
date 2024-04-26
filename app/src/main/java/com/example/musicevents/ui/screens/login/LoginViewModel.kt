@@ -15,9 +15,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+//Data class
 data class UserState(val users: List<User>)
 data class UserLogged(val id: Int?)
 
+//Action interface
 interface LoginActions {
     fun onLoginClick(email: String, pass: String, users: List<User>): Boolean
     fun onRegisterClick(name: String, pass: String, email: String, users: List<User>): Boolean
@@ -32,7 +34,7 @@ class LoginViewModel (
         initialValue = UserState(emptyList())
     )
 
-    var userLogged by mutableStateOf(UserLogged(null))
+    var userLogged by mutableStateOf(UserLogged(0))
         private set
 
     fun setUser(id: Int){

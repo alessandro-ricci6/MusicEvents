@@ -25,6 +25,7 @@ class UserRepository(
     val id = dataStore.data.map { it[USER_ID] }
 
     suspend fun setUser(id: Int) = dataStore.edit { it[USER_ID] = id }
+    suspend fun logOut() = dataStore.edit { it[USER_ID] = 0 }
 
     val users: Flow<List<User>> = userDAO.getAllUser()
 

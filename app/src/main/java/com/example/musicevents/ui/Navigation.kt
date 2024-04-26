@@ -12,6 +12,8 @@ import androidx.navigation.compose.composable
 import com.example.musicevents.ui.screens.home.HomeScreen
 import com.example.musicevents.ui.screens.login.LoginScreen
 import com.example.musicevents.ui.screens.login.LoginViewModel
+import com.example.musicevents.ui.screens.settings.SettingsScreen
+import com.example.musicevents.ui.screens.settings.SettingsViewModel
 import org.koin.androidx.compose.koinViewModel
 
 sealed class MusicEventsRoute(
@@ -42,7 +44,7 @@ fun MusicEventsNavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = if (loginVm.userLogged.id != null) MusicEventsRoute.Home.route else MusicEventsRoute.Login.route,
+        startDestination = if (loginVm.userLogged.id != 0) MusicEventsRoute.Home.route else MusicEventsRoute.Login.route,
         modifier = modifier
     ){
         with(MusicEventsRoute.Home) {
@@ -53,6 +55,12 @@ fun MusicEventsNavGraph(
         with(MusicEventsRoute.Login) {
             composable(route) {
                 LoginScreen(navController, userState, loginVm.actions)
+            }
+        }
+        with(MusicEventsRoute.Settings) {
+            composable(route) {
+                val settingVm = koinViewModel<SettingsViewModel>()
+                SettingsScreen(navController, settingVm.actions)
             }
         }
     }

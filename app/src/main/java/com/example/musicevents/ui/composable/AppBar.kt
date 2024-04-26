@@ -33,7 +33,9 @@ fun AppBar(
             )
         },
         navigationIcon = {
-            if (navController.previousBackStackEntry != null && navController.previousBackStackEntry!!.destination.route != MusicEventsRoute.Login.route) {
+            if (navController.previousBackStackEntry != null
+                && navController.previousBackStackEntry!!.destination.route != MusicEventsRoute.Login.route
+                && currentRoute.route != MusicEventsRoute.Login.route) {
                 IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.arrow_back),
@@ -43,8 +45,9 @@ fun AppBar(
             }
         },
         actions = {
-            if (currentRoute.route != MusicEventsRoute.Settings.route) {
-                IconButton(onClick = { navController.navigate(MusicEventsRoute.Home.route) }) {
+            if (currentRoute.route != MusicEventsRoute.Settings.route
+                && currentRoute.route != MusicEventsRoute.Login.route) {
+                IconButton(onClick = { navController.navigate(MusicEventsRoute.Settings.route) }) {
                     Icon(Icons.Outlined.Settings, "Settings")
                 }
             }

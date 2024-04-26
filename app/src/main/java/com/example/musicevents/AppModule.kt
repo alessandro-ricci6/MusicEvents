@@ -8,6 +8,7 @@ import com.example.musicevents.data.database.MusicEventsDatabase
 import com.example.musicevents.data.remote.JambaseSource
 import com.example.musicevents.data.repositories.UserRepository
 import com.example.musicevents.ui.screens.login.LoginViewModel
+import com.example.musicevents.ui.screens.settings.SettingsViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
@@ -52,4 +53,5 @@ val appModule = module {
     }
 
     viewModel { LoginViewModel(get()) }
+    viewModel {SettingsViewModel(get())}
 }
