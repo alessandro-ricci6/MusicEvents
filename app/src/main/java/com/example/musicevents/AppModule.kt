@@ -10,6 +10,7 @@ import com.example.musicevents.data.repositories.EventsRepositories
 import com.example.musicevents.data.repositories.UserRepository
 import com.example.musicevents.ui.screens.home.HomeViewModel
 import com.example.musicevents.ui.screens.login.LoginViewModel
+import com.example.musicevents.ui.screens.profile.ProfileViewModel
 import com.example.musicevents.ui.screens.settings.SettingsViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -65,4 +66,5 @@ val appModule = module {
     viewModel { LoginViewModel(get()) }
     viewModel {SettingsViewModel(get())}
     viewModel {HomeViewModel(get(), get())}
+    viewModel {ProfileViewModel(get(), get())}
 }

@@ -1,6 +1,7 @@
 package com.example.musicevents.ui.composable
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
@@ -45,6 +46,12 @@ fun AppBar(
             }
         },
         actions = {
+            if(currentRoute.route != MusicEventsRoute.Profile.route
+                && currentRoute.route != MusicEventsRoute.Login.route){
+                IconButton(onClick = { navController.navigate(MusicEventsRoute.Profile.route) }) {
+                    Icon(Icons.Default.Person, "Profile")
+                }
+            }
             if (currentRoute.route != MusicEventsRoute.Settings.route
                 && currentRoute.route != MusicEventsRoute.Login.route) {
                 IconButton(onClick = { navController.navigate(MusicEventsRoute.Settings.route) }) {

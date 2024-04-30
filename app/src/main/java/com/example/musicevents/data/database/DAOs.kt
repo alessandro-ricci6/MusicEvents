@@ -26,6 +26,9 @@ interface UserDAO {
     @Query("SELECT * FROM User")
     fun getAllUser(): Flow<List<User>>
 
+    @Query("SELECT * FROM User WHERE id = :id")
+    fun getUserById(id: Int): User
+
     @Upsert
     suspend fun upsert(user: User)
 }

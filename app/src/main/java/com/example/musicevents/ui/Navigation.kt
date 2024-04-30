@@ -13,6 +13,7 @@ import com.example.musicevents.ui.screens.home.HomeScreen
 import com.example.musicevents.ui.screens.home.HomeViewModel
 import com.example.musicevents.ui.screens.login.LoginScreen
 import com.example.musicevents.ui.screens.login.LoginViewModel
+import com.example.musicevents.ui.screens.profile.ProfileScreen
 import com.example.musicevents.ui.screens.settings.SettingsScreen
 import com.example.musicevents.ui.screens.settings.SettingsViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -27,9 +28,10 @@ sealed class MusicEventsRoute(
     //data object EventDetail :
     data object Settings : MusicEventsRoute("settings", "Settings")
     //data object Profile :
+    data object Profile: MusicEventsRoute("profile", "Profile")
 
     companion object {
-        val routes = setOf(Login, Home, Settings)
+        val routes = setOf(Login, Home, Settings, Profile)
     }
 }
 
@@ -63,6 +65,11 @@ fun MusicEventsNavGraph(
             composable(route) {
                 val settingVm = koinViewModel<SettingsViewModel>()
                 SettingsScreen(navController, settingVm.actions)
+            }
+        }
+        with(MusicEventsRoute.Profile){
+            composable(route){
+                ProfileScreen()
             }
         }
     }

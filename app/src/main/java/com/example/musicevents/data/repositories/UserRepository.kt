@@ -29,6 +29,10 @@ class UserRepository(
 
     val users: Flow<List<User>> = userDAO.getAllUser()
 
+    suspend fun getUserFromId(id: Int): User{
+        return userDAO.getUserById(id)
+    }
+
     suspend fun upsert(user: User){
         userDAO.upsert(user)
     }
