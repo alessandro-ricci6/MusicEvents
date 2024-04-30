@@ -1,13 +1,10 @@
 package com.example.musicevents.ui.screens.home
 
-import android.Manifest
 import android.content.Context.CONNECTIVITY_SERVICE
 import android.content.Intent
 import android.provider.Settings
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,49 +12,44 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import com.example.musicevents.data.remote.Event
+import com.example.musicevents.data.remote.EventApi
 import com.example.musicevents.data.remote.JamBaseResponse
 import com.example.musicevents.data.remote.JambaseSource
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import com.example.musicevents.ui.composable.EventItem
 
 @Composable
-fun HomeScreen(){
-    var eventList by remember { mutableStateOf<List<Event>>(emptyList()) }
+fun HomeScreen(
+    actions: HomeActions
+){
+    var eventList by remember { mutableStateOf<List<EventApi>>(emptyList()) }
     var searchInput by remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
     var events by remember { mutableStateOf<JamBaseResponse?>(null) }
-    //val placeNotFound by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
 
     val ctx = LocalContext.current
     fun isOnline(): Boolean {
@@ -82,11 +74,20 @@ fun HomeScreen(){
 
     val coroutineScope = rememberCoroutineScope()
     fun searchEventsFromName() = coroutineScope.launch {
+        isLoading = true
         if (isOnline()) {
-            val res = osmDataSource.searchEvents(searchInput)
-            events = res
-            if(events!!.events.isNotEmpty()){
-                eventList = events!!.events
+            try {
+                val res = osmDataSource.searchEvents(searchInput)
+                events = res
+                if (res.events.isNotEmpty()) {
+                    eventList = res.events
+                } else {
+                    // Handle empty results case (optional: show message or placeholder)
+                }
+            } catch (e: Exception) {
+                // Handle errors gracefully (optional: show error message or retry option)
+            } finally {
+                isLoading = false // Set loading state to false after finishing API call
             }
         } else {
             val res = snackbarHostState.showSnackbar(
@@ -112,6 +113,7 @@ fun HomeScreen(){
                     tint = Color.Black
                 )
             }
+
         }
         Row(
             modifier = Modifier.padding(10.dp)
@@ -138,71 +140,20 @@ fun HomeScreen(){
                 modifier = Modifier.padding(10.dp),
             ) {
                 items(eventList) { item ->
-                    EventItem(item = item)
+                    EventItem(item = item, actions)
                 }
             }
-        } else {
+        } else if (isLoading) {
+            // Show loading indicator while initially fetching events (optional)
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally))
+        }
+        else {
             NoEventsFound()
         }
     }
 
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EventItem(item: Event) {
-    var eventSaved by remember { mutableStateOf(false) }
-    val icon = if(eventSaved) Icons.Default.Favorite else Icons.Default.FavoriteBorder
-    OutlinedCard(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-        ),
-        border = BorderStroke(1.dp, Color.Black),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 15.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = item.name,
-                modifier = Modifier
-                    .padding(10.dp)
-                    .weight(1f),
-                textAlign = TextAlign.Center,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-            IconButton(onClick = {
-                eventSaved = !eventSaved
-            },
-                modifier = Modifier.padding(5.dp)) {
-                Icon(
-                    icon,
-                    contentDescription = "",
-                    tint = Color.Black
-                )
-            }
-        }
-        Text(text = item.location.name, modifier = Modifier.padding(10.dp))
-        //item.performer.iterator().forEach { Text(text = it.name) }
-
-        AsyncImage(
-            model = item.imageUrl,
-            contentDescription = "The delasign logo",
-            modifier = Modifier
-                .padding(10.dp)
-                .fillMaxWidth()
-                .border(BorderStroke(3.dp, Color.Black))
-        )
-        Text(
-            text = "In ${item.location.city.name}, ${item.location.city.county.name} on ${item.date}",
-            modifier = Modifier
-                .padding(20.dp),
-            fontSize = 15.sp
-        )
-    }
 }
 
 @Composable

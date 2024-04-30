@@ -15,6 +15,8 @@ interface EventsDAO {
     @Upsert
     suspend fun upsert(event: Event)
 
+    @Upsert
+    suspend fun userSaveEvent(userSaveEvent: UserSaveEvent)
     @Delete
     suspend fun delete(item: Event)
 }
@@ -25,5 +27,5 @@ interface UserDAO {
     fun getAllUser(): Flow<List<User>>
 
     @Upsert
-    fun upsert(user: User)
+    suspend fun upsert(user: User)
 }

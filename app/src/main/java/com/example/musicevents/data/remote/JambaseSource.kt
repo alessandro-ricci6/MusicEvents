@@ -35,7 +35,7 @@ data class Performer(
 )
 
 @Serializable
-data class Event(
+data class EventApi(
     @SerialName("name")
     val name: String,
     @SerialName("endDate")
@@ -45,13 +45,15 @@ data class Event(
     @SerialName("location")
     val location: Location,
     @SerialName("performer")
-    val performer: List<Performer>
+    val performer: List<Performer>,
+    @SerialName("identifier")
+    val id: String
 )
 
 @Serializable
 data class JamBaseResponse(
     @SerialName("events")
-    val events: List<Event>
+    val events: List<EventApi>
 )
 
 

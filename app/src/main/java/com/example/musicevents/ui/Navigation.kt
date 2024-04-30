@@ -10,6 +10,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.musicevents.ui.screens.home.HomeScreen
+import com.example.musicevents.ui.screens.home.HomeViewModel
 import com.example.musicevents.ui.screens.login.LoginScreen
 import com.example.musicevents.ui.screens.login.LoginViewModel
 import com.example.musicevents.ui.screens.settings.SettingsScreen
@@ -49,7 +50,8 @@ fun MusicEventsNavGraph(
     ){
         with(MusicEventsRoute.Home) {
             composable(route) {
-                HomeScreen()
+                val homeVm = koinViewModel<HomeViewModel>()
+                HomeScreen(homeVm.actions)
             }
         }
         with(MusicEventsRoute.Login) {

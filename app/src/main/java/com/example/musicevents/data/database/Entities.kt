@@ -1,11 +1,9 @@
 package com.example.musicevents.data.database
 
 import androidx.room.ColumnInfo
-import androidx.room.Embedded
 import androidx.room.Entity
-import androidx.room.Junction
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import androidx.room.Relation
 
 @Entity
 data class User (
@@ -25,7 +23,7 @@ data class User (
 @Entity
 data class Event (
     @PrimaryKey
-    val id: Int,
+    val id: String,
 
     @ColumnInfo
     val name: String,
@@ -37,30 +35,20 @@ data class Event (
     val performer: String,
 
     @ColumnInfo
-    val date: String
+    val date: String,
+
+    @ColumnInfo
+    val imageUrl: String
 )
 
-data class UserEventCrossRef(
-    val userId: Long,
-    val eventId: Long
-)
+@Entity
+data class UserSaveEvent (
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
 
-data class UserWithEvents(
-    @Embedded val user: User,
-    @Relation(
-        parentColumn = "userId",
-        entityColumn = "eventId",
-        associateBy = Junction(UserEventCrossRef::class)
-    )
-    val events: List<Event>
-)
+    @ColumnInfo
+    val userId: Int,
 
-data class EventWithUsers(
-    @Embedded val event: Event,
-    @Relation(
-        parentColumn = "eventId",
-        entityColumn = "userId",
-        associateBy = Junction(UserEventCrossRef::class)
-    )
-    val users: List<User>
+    @ColumnInfo
+    val eventId: String
 )

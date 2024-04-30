@@ -6,7 +6,9 @@ import androidx.room.Room
 import org.koin.androidx.viewmodel.dsl.viewModel
 import com.example.musicevents.data.database.MusicEventsDatabase
 import com.example.musicevents.data.remote.JambaseSource
+import com.example.musicevents.data.repositories.EventsRepositories
 import com.example.musicevents.data.repositories.UserRepository
+import com.example.musicevents.ui.screens.home.HomeViewModel
 import com.example.musicevents.ui.screens.login.LoginViewModel
 import com.example.musicevents.ui.screens.settings.SettingsViewModel
 import io.ktor.client.HttpClient
@@ -52,6 +54,15 @@ val appModule = module {
         )
     }
 
+    single {
+        EventsRepositories(
+            get<MusicEventsDatabase>().eventsDAO(),
+            get<Context>().applicationContext.contentResolver,
+            get()
+        )
+    }
+
     viewModel { LoginViewModel(get()) }
     viewModel {SettingsViewModel(get())}
+    viewModel {HomeViewModel(get(), get())}
 }
