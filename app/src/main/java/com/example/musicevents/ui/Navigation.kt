@@ -53,7 +53,8 @@ fun MusicEventsNavGraph(
         with(MusicEventsRoute.Home) {
             composable(route) {
                 val homeVm = koinViewModel<HomeViewModel>()
-                HomeScreen(homeVm.actions)
+                val state by homeVm.state.collectAsStateWithLifecycle()
+                HomeScreen(homeVm.actions, state)
             }
         }
         with(MusicEventsRoute.Login) {

@@ -1,5 +1,7 @@
 package com.example.musicevents.data.remote
 
+import android.util.Log
+import com.example.musicevents.utils.Coordinates
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -65,6 +67,12 @@ class JambaseSource(
 
     suspend fun searchEvents(artistName: String): JamBaseResponse{
         val url = "${baseUrl}events?perPage=10&artistName=${artistName}&apikey=${apiKey}"
+        return httpClient.get(url).body()
+    }
+
+    suspend fun searchFromCoordinates(coordinates: Coordinates): JamBaseResponse{
+        val url = "${baseUrl}events?perPage=10&geoLatitude=${coordinates.latitude}&geoLongitude=${coordinates.longitude}&apikey=${apiKey}"
+        Log.d("LINK", url)
         return httpClient.get(url).body()
     }
 }
