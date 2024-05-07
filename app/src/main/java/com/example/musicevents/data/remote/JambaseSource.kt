@@ -71,7 +71,8 @@ class JambaseSource(
     }
 
     suspend fun searchFromCoordinates(coordinates: Coordinates): JamBaseResponse{
-        val url = "${baseUrl}events?perPage=10&geoLatitude=${coordinates.latitude}&geoLongitude=${coordinates.longitude}&apikey=${apiKey}"
+        val url = "${baseUrl}events?perPage=10&geoLatitude=${coordinates.latitude}&geoLongitude=${coordinates.longitude}" +
+                "&geoRadiusAmount=100&geoRadiusUnits=km&apikey=${apiKey}"
         Log.d("LINK", url)
         return httpClient.get(url).body()
     }
