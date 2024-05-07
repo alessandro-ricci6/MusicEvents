@@ -33,6 +33,10 @@ class UserRepository(
         return userDAO.getUserById(id)
     }
 
+    suspend fun getIdFromEmail(email: String): Int {
+        return userDAO.getIdByEmail(email)
+    }
+
     suspend fun upsert(user: User){
         userDAO.upsert(user)
     }

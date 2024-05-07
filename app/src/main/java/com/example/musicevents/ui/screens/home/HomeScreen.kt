@@ -12,21 +12,26 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,11 +44,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.musicevents.data.remote.EventApi
+import com.example.musicevents.data.remote.Genre
 import com.example.musicevents.data.remote.JamBaseResponse
 import com.example.musicevents.data.remote.JambaseSource
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import com.example.musicevents.ui.composable.EventItem
+import com.example.musicevents.ui.composable.GenreFilter
 import com.example.musicevents.utils.Coordinates
 import com.example.musicevents.utils.LocationService
 import com.example.musicevents.utils.PermissionStatus
@@ -56,6 +63,7 @@ fun HomeScreen(
     state: HomeState
 ){
     var eventList by remember { mutableStateOf<List<EventApi>>(emptyList()) }
+    var genreList by remember { mutableStateOf<List<Genre>>(emptyList()) }
     var searchInput by remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
     var events by remember { mutableStateOf<JamBaseResponse?>(null) }
@@ -82,7 +90,7 @@ fun HomeScreen(
     }
 
     //Api
-    val osmDataSource = koinInject<JambaseSource>()
+    val jambaseDataSource = koinInject<JambaseSource>()
 
     val coroutineScope = rememberCoroutineScope()
     fun searchEventsFromName() = coroutineScope.launch {
@@ -90,7 +98,7 @@ fun HomeScreen(
         eventList = emptyList()
         if (isOnline()) {
             try {
-                val res = osmDataSource.searchEvents(searchInput)
+                val res = jambaseDataSource.searchEvents(searchInput)
                 events = res
                 if (res.events.isNotEmpty()) {
                     eventList = res.events
@@ -118,7 +126,58 @@ fun HomeScreen(
         eventList = emptyList()
         if (isOnline()) {
             try {
-                val res = osmDataSource.searchFromCoordinates(coordinates)
+                val res = jambaseDataSource.searchFromCoordinates(coordinates)
+                events = res
+                if (res.events.isNotEmpty()) {
+                    eventList = res.events
+                } else {
+                    // Handle empty results case (optional: show message or placeholder)
+                }
+            } catch (e: Exception) {
+                // Handle errors gracefully (optional: show error message or retry option)
+            } finally {
+                isLoading = false // Set loading state to false after finishing API call
+            }
+        } else {
+            val res = snackbarHostState.showSnackbar(
+                message = "No Internet connectivity",
+                actionLabel = "Go to Settings",
+                duration = SnackbarDuration.Long
+            )
+            if (res == SnackbarResult.ActionPerformed) {
+                openWirelessSettings()
+            }
+        }
+    }
+
+    fun getAllGenres() =  coroutineScope.launch {
+        if (isOnline()) {
+            try {
+                val res = jambaseDataSource.getAllGenres()
+                genreList = res.genres
+            } catch (e: Exception) {
+                // Handle errors gracefully (optional: show error message or retry option)
+            } finally {
+                // Set loading state to false after finishing API call
+            }
+        } else {
+            val res = snackbarHostState.showSnackbar(
+                message = "No Internet connectivity",
+                actionLabel = "Go to Settings",
+                duration = SnackbarDuration.Long
+            )
+            if (res == SnackbarResult.ActionPerformed) {
+                openWirelessSettings()
+            }
+        }
+    }
+
+    fun searchEventsFromGenre(genre: String) = coroutineScope.launch {
+        isLoading = true
+        eventList = emptyList()
+        if (isOnline()) {
+            try {
+                val res = jambaseDataSource.searchEventsFromGenre(genre)
                 events = res
                 if (res.events.isNotEmpty()) {
                     eventList = res.events
@@ -185,21 +244,9 @@ fun HomeScreen(
                     tint = MaterialTheme.colorScheme.inverseSurface
                 )
             }
-
         }
-        Row(
-            modifier = Modifier.padding(10.dp)
-        ) {
-            TextField(
-                value = searchInput,
-                onValueChange = { searchInput = it },
-                modifier = Modifier
-                    .padding(end = 5.dp)
-                    .fillMaxWidth()
-                    .weight(1f),
-                placeholder = { Text(text = "Enter artist name") },
-                trailingIcon = searchBtn,
-            )
+
+        val locaBtn = @Composable {
             IconButton(onClick = {
                 coroutineScope.launch {
                     requestLocation()
@@ -217,7 +264,30 @@ fun HomeScreen(
                 )
             }
         }
-        //Demo_ExposedDropdownMenuBox()
+
+        OutlinedTextField(
+            value = searchInput,
+            onValueChange = { searchInput = it },
+            modifier = Modifier
+                .padding(10.dp)
+                .fillMaxWidth(),
+            placeholder = { Text(text = "Enter artist name") },
+            trailingIcon = searchBtn,
+            leadingIcon = locaBtn,
+            shape = RoundedCornerShape(20.dp)
+        )
+
+        Row(modifier = Modifier.padding(5.dp)) {
+            getAllGenres()
+            Text(text = "Select the genre:", modifier = Modifier.align(Alignment.CenterVertically))
+            LazyRow {
+                items(genreList) {item ->
+                    Button(onClick = { searchEventsFromGenre(item.identifier) }, modifier = Modifier.padding(5.dp)) {
+                        Text(text = item.name)
+                    }
+                }
+            }
+        }
 
         if (state.showLocationDisabledAlert) {
             AlertDialog(

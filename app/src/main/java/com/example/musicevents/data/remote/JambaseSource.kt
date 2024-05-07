@@ -58,6 +58,20 @@ data class JamBaseResponse(
     val events: List<EventApi>
 )
 
+@Serializable
+data class Genre(
+    @SerialName("name")
+    val name: String,
+    @SerialName("identifier")
+    val identifier: String
+)
+
+@Serializable
+data class GenreResponse(
+    @SerialName("genres")
+    val genres: List<Genre>
+)
+
 
 class JambaseSource(
     private val httpClient: HttpClient
@@ -73,7 +87,17 @@ class JambaseSource(
     suspend fun searchFromCoordinates(coordinates: Coordinates): JamBaseResponse{
         val url = "${baseUrl}events?perPage=10&geoLatitude=${coordinates.latitude}&geoLongitude=${coordinates.longitude}" +
                 "&geoRadiusAmount=100&geoRadiusUnits=km&apikey=${apiKey}"
-        Log.d("LINK", url)
+        return httpClient.get(url).body()
+    }
+
+    suspend fun getAllGenres(): GenreResponse{
+        val url = "${baseUrl}genres?apikey=${apiKey}"
+        return httpClient.get(url).body()
+    }
+
+    suspend fun searchEventsFromGenre(genre: String): JamBaseResponse{
+        val url = "${baseUrl}events?perPage=10&genreSlug=${genre}&apikey=${apiKey}"
+
         return httpClient.get(url).body()
     }
 }

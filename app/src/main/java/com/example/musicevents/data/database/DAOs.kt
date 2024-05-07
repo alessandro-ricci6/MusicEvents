@@ -29,6 +29,9 @@ interface UserDAO {
     @Query("SELECT * FROM User WHERE id = :id")
     fun getUserById(id: Int): User
 
+    @Query("SELECT User.id FROM User WHERE email = :email")
+    fun getIdByEmail(email: String): Int
+
     @Upsert
     suspend fun upsert(user: User)
 }

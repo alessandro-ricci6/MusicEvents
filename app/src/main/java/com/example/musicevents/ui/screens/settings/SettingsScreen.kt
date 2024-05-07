@@ -24,6 +24,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,7 +50,7 @@ fun SettingsScreen(
         Demo_ExposedDropdownMenuBox(action, themeState)
         HorizontalDivider()
         ListItem(
-            headlineContent = { Button(
+            headlineContent = { TextButton(
                 onClick = { action.logOut()
                     navHostController.navigate(MusicEventsRoute.Login.route)},
                 modifier = Modifier.fillMaxSize()) {
