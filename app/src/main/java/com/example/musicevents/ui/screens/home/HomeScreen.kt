@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import com.example.musicevents.data.remote.EventApi
 import com.example.musicevents.data.remote.JamBaseResponse
 import com.example.musicevents.data.remote.JambaseSource
-import com.example.musicevents.ui.composable.Demo_ExposedDropdownMenuBox
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import com.example.musicevents.ui.composable.EventItem
@@ -191,13 +190,15 @@ fun HomeScreen(
         Row(
             modifier = Modifier.padding(10.dp)
         ) {
-            TextField(value = searchInput,
+            TextField(
+                value = searchInput,
                 onValueChange = { searchInput = it },
                 modifier = Modifier
                     .padding(end = 5.dp)
                     .fillMaxWidth()
                     .weight(1f),
-                trailingIcon = searchBtn
+                placeholder = { Text(text = "Enter artist name") },
+                trailingIcon = searchBtn,
             )
             IconButton(onClick = {
                 coroutineScope.launch {
@@ -216,7 +217,7 @@ fun HomeScreen(
                 )
             }
         }
-        Demo_ExposedDropdownMenuBox()
+        //Demo_ExposedDropdownMenuBox()
 
         if (state.showLocationDisabledAlert) {
             AlertDialog(
@@ -305,7 +306,7 @@ fun NoEventsFound(){
     Text(
         text = "No events found",
         modifier = Modifier
-            .padding(5.dp)
+            .padding(15.dp, top = 5.dp)
             .fillMaxWidth()
     )
 }

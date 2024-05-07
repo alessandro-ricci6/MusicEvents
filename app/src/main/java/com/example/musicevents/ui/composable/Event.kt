@@ -3,17 +3,25 @@ package com.example.musicevents.ui.composable
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,15 +36,25 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.musicevents.data.database.Event
 import com.example.musicevents.data.remote.EventApi
+import com.example.musicevents.data.remote.Performer
 import com.example.musicevents.ui.screens.home.HomeActions
+import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.Alignment
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventItem(item: EventApi, actions: HomeActions) {
     var eventSaved by remember { mutableStateOf(false) }
+    var showSheet by remember { mutableStateOf(false) }
     val icon = if(eventSaved) Icons.Default.Favorite else Icons.Default.FavoriteBorder
     val eventId = item.id
     val eventLocation = "${item.location.name} in ${item.location.city.name}, ${item.location.city.county.name}"
-    val eventPerformer: String = ""
+    val eventPerformer = ""
+
+    if (showSheet) {
+        BottomSheet (onDismiss = { showSheet = false }, performerList = item.performer)
+    }
+
     OutlinedCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -54,7 +72,6 @@ fun EventItem(item: EventApi, actions: HomeActions) {
                 modifier = Modifier
                     .padding(10.dp)
                     .weight(1f),
-                textAlign = TextAlign.Center,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -74,7 +91,6 @@ fun EventItem(item: EventApi, actions: HomeActions) {
             }
         }
         Text(text = item.location.name, modifier = Modifier.padding(10.dp))
-        //item.performer.iterator().forEach { Text(text = it.name) }
 
         AsyncImage(
             model = item.imageUrl,
@@ -87,8 +103,35 @@ fun EventItem(item: EventApi, actions: HomeActions) {
         Text(
             text = "In ${item.location.city.name}, ${item.location.city.county.name} on ${item.date}",
             modifier = Modifier
-                .padding(20.dp),
+                .padding(10.dp),
             fontSize = 15.sp
         )
+
+        Button(onClick = { showSheet = true },
+            modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 5.dp)) {
+            Text(text = "See performer")
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BottomSheet(onDismiss: () -> Unit, performerList: List<Performer>) {
+    val modalBottomSheetState = rememberModalBottomSheetState()
+
+    ModalBottomSheet(
+        onDismissRequest = { onDismiss() },
+        sheetState = modalBottomSheetState,
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        modifier = Modifier.defaultMinSize(minHeight = 150.dp)
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(bottom = 40.dp)
+        ) {
+            items(performerList) { item ->
+                Text(text = item.name,
+                    modifier = Modifier.padding(7.dp))
+            }
+        }
     }
 }
