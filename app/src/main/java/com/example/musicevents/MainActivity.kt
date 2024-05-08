@@ -1,7 +1,6 @@
 package com.example.musicevents
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -20,7 +19,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.musicevents.ui.MusicEventsNavGraph
 import com.example.musicevents.ui.MusicEventsRoute
-import com.example.musicevents.ui.composable.AppBar
+import com.example.musicevents.ui.composable.NavBar
+import com.example.musicevents.ui.composable.TopBar
 import com.example.musicevents.ui.screens.settings.SettingsViewModel
 import com.example.musicevents.ui.screens.settings.Theme
 import org.koin.androidx.compose.koinViewModel
@@ -57,7 +57,8 @@ class MainActivity : ComponentActivity() {
                     }
 
                     Scaffold(
-                        topBar = { AppBar(navController, currentRoute) }
+                        topBar = { TopBar(currentRoute)},
+                        bottomBar = { NavBar(navController, currentRoute) }
                     ) { contentPadding ->
                         MusicEventsNavGraph(
                             navController,
