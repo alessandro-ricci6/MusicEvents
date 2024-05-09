@@ -1,5 +1,6 @@
 package com.example.musicevents.ui.composable
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
@@ -40,16 +41,17 @@ import com.example.musicevents.data.remote.Performer
 import com.example.musicevents.ui.screens.home.HomeActions
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EventItem(item: EventApi, actions: HomeActions) {
+fun EventItem(item: EventApi, actions: HomeActions, userId: Int) {
     var eventSaved by remember { mutableStateOf(false) }
     var showSheet by remember { mutableStateOf(false) }
+    eventSaved = actions.isEventSaved(userId, item.id)
     val icon = if(eventSaved) Icons.Default.Favorite else Icons.Default.FavoriteBorder
-    val eventId = item.id
-    val eventLocation = "${item.location.name} in ${item.location.city.name}, ${item.location.city.county.name}"
-    val eventPerformer = ""
 
     if (showSheet) {
         BottomSheet (onDismiss = { showSheet = false }, performerList = item.performer)
@@ -76,11 +78,14 @@ fun EventItem(item: EventApi, actions: HomeActions) {
                 fontWeight = FontWeight.Bold
             )
             IconButton(onClick = {
-                actions.saveEvent(
-                    Event(name = item.name, date = item.date,
-                    imageUrl = item.imageUrl, venue = eventLocation, performer = eventPerformer, id = item.id)
-                )
+                if (eventSaved) {
+                    actions.deleteSavedEvents(item.id)
+                    Log.d("SAVED", item.id)
+                } else {
+                    actions.saveEvent(item.id)
+                }
                 eventSaved = !eventSaved
+                Log.d("SAVED", eventSaved.toString())
             },
                 modifier = Modifier.padding(5.dp)) {
                 Icon(
@@ -94,7 +99,7 @@ fun EventItem(item: EventApi, actions: HomeActions) {
 
         AsyncImage(
             model = item.imageUrl,
-            contentDescription = "The delasign logo",
+            contentDescription = "Event Image",
             modifier = Modifier
                 .padding(10.dp)
                 .fillMaxWidth()
@@ -108,7 +113,9 @@ fun EventItem(item: EventApi, actions: HomeActions) {
         )
 
         Button(onClick = { showSheet = true },
-            modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 5.dp)) {
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(bottom = 5.dp)) {
             Text(text = "See performer")
         }
     }
@@ -126,7 +133,9 @@ fun BottomSheet(onDismiss: () -> Unit, performerList: List<Performer>) {
         modifier = Modifier.defaultMinSize(minHeight = 150.dp)
     ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(bottom = 40.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 40.dp)
         ) {
             items(performerList) { item ->
                 Text(text = item.name,

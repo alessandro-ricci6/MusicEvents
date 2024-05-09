@@ -17,6 +17,16 @@ interface EventsDAO {
 
     @Upsert
     suspend fun userSaveEvent(userSaveEvent: UserSaveEvent)
+
+    @Query("SELECT id FROM UserSaveEvent WHERE userId = :userId AND eventId = :eventId")
+    fun getSavedEventId(userId: Int, eventId: String): List<Int>
+
+    @Query("DELETE FROM UserSaveEvent WHERE id = :id")
+    suspend fun deleteSavedEvent(id: Int)
+
+    @Query("SELECT * FROM UserSaveEvent WHERE userId = :userId AND eventId = :eventId")
+    fun isEventSaved(userId: Int, eventId: String): List<UserSaveEvent>
+
     @Delete
     suspend fun delete(item: Event)
 }

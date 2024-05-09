@@ -60,7 +60,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun HomeScreen(
     actions: HomeActions,
-    state: HomeState
+    state: HomeState,
+    userId : Int
 ){
     var eventList by remember { mutableStateOf<List<EventApi>>(emptyList()) }
     var genreList by remember { mutableStateOf<List<Genre>>(emptyList()) }
@@ -277,7 +278,7 @@ fun HomeScreen(
             shape = RoundedCornerShape(20.dp)
         )
 
-        Row(modifier = Modifier.padding(5.dp)) {
+        Row(modifier = Modifier.padding(horizontal = 5.dp)) {
             getAllGenres()
             Text(text = "Select the genre:", modifier = Modifier.align(Alignment.CenterVertically))
             LazyRow {
@@ -352,10 +353,10 @@ fun HomeScreen(
 
         if(eventList.isNotEmpty()){
             LazyColumn(
-                modifier = Modifier.padding(10.dp),
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 0.dp),
             ) {
                 items(eventList) { item ->
-                    EventItem(item = item, actions)
+                    EventItem(item = item, actions, userId)
                 }
             }
         } else if (isLoading) {
