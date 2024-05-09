@@ -21,6 +21,9 @@ interface EventsDAO {
     @Query("SELECT id FROM UserSaveEvent WHERE userId = :userId AND eventId = :eventId")
     fun getSavedEventId(userId: Int, eventId: String): List<Int>
 
+    @Query("SELECT Event.* FROM Event INNER JOIN UserSaveEvent ON Event.id = UserSaveEvent.eventId WHERE UserSaveEvent.userId = :userId")
+    fun getAllEventOfUser(userId: Int): List<Event>
+
     @Query("DELETE FROM UserSaveEvent WHERE id = :id")
     suspend fun deleteSavedEvent(id: Int)
 

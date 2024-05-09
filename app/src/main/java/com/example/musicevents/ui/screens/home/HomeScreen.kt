@@ -50,7 +50,6 @@ import com.example.musicevents.data.remote.JambaseSource
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import com.example.musicevents.ui.composable.EventItem
-import com.example.musicevents.ui.composable.GenreFilter
 import com.example.musicevents.utils.Coordinates
 import com.example.musicevents.utils.LocationService
 import com.example.musicevents.utils.PermissionStatus

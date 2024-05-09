@@ -35,6 +35,14 @@ class EventsRepositories(
         }
     }
 
+    suspend fun getEventOfUser(userId: Int): List<Event> {
+        return withContext(Dispatchers.IO) {
+            val res = eventsDAO.getAllEventOfUser(userId)
+            Log.d("EVENTSSIZE", res.size.toString())
+            res
+        }
+    }
+
     suspend fun deleteSavedEvent(id: Int){
         eventsDAO.deleteSavedEvent(id)
         Log.d("SAVED", "Repo $id")

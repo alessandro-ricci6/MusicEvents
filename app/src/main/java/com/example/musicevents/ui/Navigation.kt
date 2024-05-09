@@ -20,6 +20,7 @@ import com.example.musicevents.ui.screens.home.HomeViewModel
 import com.example.musicevents.ui.screens.login.LoginScreen
 import com.example.musicevents.ui.screens.login.LoginViewModel
 import com.example.musicevents.ui.screens.profile.ProfileScreen
+import com.example.musicevents.ui.screens.profile.ProfileViewModel
 import com.example.musicevents.ui.screens.settings.SettingsScreen
 import com.example.musicevents.ui.screens.settings.SettingsViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -51,6 +52,7 @@ fun MusicEventsNavGraph(
     //val placesState by placesVm.state.collectAsStateWithLifecycle()
     val loginVm = koinViewModel<LoginViewModel>()
     val userState by loginVm.state.collectAsStateWithLifecycle()
+    val userId: Int = loginVm.userLogged.id!!
 
     NavHost(
         navController = navController,
@@ -61,7 +63,6 @@ fun MusicEventsNavGraph(
             composable(route) {
                 val homeVm = koinViewModel<HomeViewModel>()
                 val state by homeVm.state.collectAsStateWithLifecycle()
-                val userId: Int = loginVm.userLogged.id!!
                 HomeScreen(homeVm.actions, state, userId)
             }
         }
@@ -79,7 +80,8 @@ fun MusicEventsNavGraph(
         }
         with(MusicEventsRoute.Profile){
             composable(route){
-                ProfileScreen()
+                val profileVm = koinViewModel<ProfileViewModel>()
+                ProfileScreen(userId, profileVm.actions)
             }
         }
     }

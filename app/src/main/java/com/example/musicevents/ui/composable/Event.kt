@@ -52,6 +52,11 @@ fun EventItem(item: EventApi, actions: HomeActions, userId: Int) {
     var showSheet by remember { mutableStateOf(false) }
     eventSaved = actions.isEventSaved(userId, item.id)
     val icon = if(eventSaved) Icons.Default.Favorite else Icons.Default.FavoriteBorder
+    val venue = "In ${item.location.name} in ${item.location.city.name}, ${item.location.city.county.name}"
+    var performer = ""
+    for (p in item.performer){
+        performer += p.name
+    }
 
     if (showSheet) {
         BottomSheet (onDismiss = { showSheet = false }, performerList = item.performer)
@@ -82,7 +87,8 @@ fun EventItem(item: EventApi, actions: HomeActions, userId: Int) {
                     actions.deleteSavedEvents(item.id)
                     Log.d("SAVED", item.id)
                 } else {
-                    actions.saveEvent(item.id)
+                    val event = Event(id = item.id, name = item.name, venue = venue, date = item.date, imageUrl = item.imageUrl, performer = performer)
+                    actions.saveEvent(event)
                 }
                 eventSaved = !eventSaved
                 Log.d("SAVED", eventSaved.toString())

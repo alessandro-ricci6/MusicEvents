@@ -26,10 +26,8 @@ data class HomeState(
     val showLocationPermissionPermanentlyDeniedSnackbar: Boolean = false,
 )
 interface HomeActions{
-    fun saveEvent(eventId: String)
-
+    fun saveEvent(event: Event)
     suspend fun isSaved(userId: Int, eventId: String): Boolean
-
     fun setShowLocationDisabledAlert(show: Boolean)
     fun setShowLocationPermissionDeniedAlert(show: Boolean)
     fun setShowLocationPermissionPermanentlyDeniedSnackbar(show: Boolean)
@@ -46,9 +44,10 @@ class HomeViewModel(
     val state = _state.asStateFlow()
 
     val actions = object: HomeActions{
-        override fun saveEvent(eventId: String) {
+        override fun saveEvent(event: Event) {
             viewModelScope.launch {
-                loginViewModel.userLogged.id?.let { eventsRepositories.userSaveEvent(it, eventId) }
+                eventsRepositories.upsert(event)
+                loginViewModel.userLogged.id?.let { eventsRepositories.userSaveEvent(it, event.id) }
             }
         }
 

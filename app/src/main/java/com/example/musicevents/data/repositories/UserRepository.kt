@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.intPreferencesKey
+import io.ktor.util.valuesOf
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 
 class UserRepository(
@@ -30,7 +33,10 @@ class UserRepository(
     val users: Flow<List<User>> = userDAO.getAllUser()
 
     suspend fun getUserFromId(id: Int): User{
-        return userDAO.getUserById(id)
+        return withContext(Dispatchers.IO) {
+            val res = userDAO.getUserById(id)
+            res
+        }
     }
 
     suspend fun getIdFromEmail(email: String): Int {
