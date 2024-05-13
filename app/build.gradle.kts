@@ -88,6 +88,8 @@ dependencies {
     implementation(libs.play.services.location)
     //DataStore
     implementation(libs.androidx.datastore.preferences)
+    //Gson
+    implementation(libs.gson)
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)

@@ -53,9 +53,9 @@ fun EventItem(item: EventApi, actions: HomeActions, userId: Int) {
     eventSaved = actions.isEventSaved(userId, item.id)
     val icon = if(eventSaved) Icons.Default.Favorite else Icons.Default.FavoriteBorder
     val venue = "In ${item.location.name} in ${item.location.city.name}, ${item.location.city.county.name}"
-    var performer = ""
-    for (p in item.performer){
-        performer += p.name
+    val performer:ArrayList<String> = emptyArray<String>().toCollection(ArrayList())
+    item.performer.forEach { p ->
+        performer.add(p.name)
     }
 
     if (showSheet) {

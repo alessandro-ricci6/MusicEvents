@@ -39,9 +39,10 @@ fun NavBar(
                 .height(50.dp)
                 .fillMaxWidth()
         ) {
+            val loginRoute = currentRoute.route != MusicEventsRoute.Login.route
             possibleRoute.forEach { item ->
                 val selected = item.route == currentRoute.route
-                NavigationBarItem(selected = selected, onClick = { navController.navigate(item.route) }, icon = {
+                NavigationBarItem(selected = selected, enabled = loginRoute, onClick = { navController.navigate(item.route) }, icon = {
                     Icon(
                     imageVector = item.icon,
                     contentDescription = item.title,

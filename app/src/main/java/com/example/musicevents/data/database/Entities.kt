@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import androidx.room.TypeConverter
 
 @Entity
 data class User (
@@ -32,7 +33,7 @@ data class Event (
     val venue: String,
 
     @ColumnInfo
-    val performer: String,
+    val performer: ArrayList<String>,
 
     @ColumnInfo
     val date: String,

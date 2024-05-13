@@ -43,6 +43,9 @@ fun ProfileScreen(
         LazyColumn {
             items(userEvents) {item ->
                 Text(text = item.name)
+                item.performer.forEach {
+                    Text(text = it)
+                }
             }
         }
     }
