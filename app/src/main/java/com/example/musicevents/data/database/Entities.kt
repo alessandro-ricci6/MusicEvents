@@ -22,27 +22,6 @@ data class User (
 )
 
 @Entity
-data class Event (
-    @PrimaryKey
-    val id: String,
-
-    @ColumnInfo
-    val name: String,
-
-    @ColumnInfo
-    val venue: String,
-
-    @ColumnInfo
-    val performer: ArrayList<String>,
-
-    @ColumnInfo
-    val date: String,
-
-    @ColumnInfo
-    val imageUrl: String
-)
-
-@Entity
 data class UserSaveEvent (
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,

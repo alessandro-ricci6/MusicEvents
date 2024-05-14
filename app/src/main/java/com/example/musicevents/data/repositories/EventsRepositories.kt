@@ -4,7 +4,6 @@ import android.content.ContentResolver
 import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import com.example.musicevents.data.database.Event
 import com.example.musicevents.data.database.EventsDAO
 import com.example.musicevents.data.database.User
 import com.example.musicevents.data.database.UserSaveEvent
@@ -17,9 +16,6 @@ class EventsRepositories(
     private val contentResolver: ContentResolver,
     private val dataStore: DataStore<Preferences>
 ) {
-    suspend fun upsert(event: Event) {
-        eventsDAO.upsert(event)
-    }
 
     suspend fun userSaveEvent(userId: Int, eventId: String){
         eventsDAO.userSaveEvent(UserSaveEvent(userId = userId, eventId = eventId))
@@ -33,17 +29,8 @@ class EventsRepositories(
         }
     }
 
-    suspend fun getEventOfUser(userId: Int): List<Event> {
-        return withContext(Dispatchers.IO) {
-            val res = eventsDAO.getAllEventOfUser(userId)
-            Log.d("EVENTSSIZE", res.size.toString())
-            res
-        }
-    }
-
-    suspend fun deleteSavedEvent(id: Int){
-        eventsDAO.deleteSavedEvent(id)
-        Log.d("SAVED", "Repo $id")
+    suspend fun deleteSavedEvent(userId: Int, eventId: String){
+        eventsDAO.deleteSavedEvent(userId, eventId)
     }
 
     suspend fun getSavedEventId(userId: Int, eventId: String): Int {

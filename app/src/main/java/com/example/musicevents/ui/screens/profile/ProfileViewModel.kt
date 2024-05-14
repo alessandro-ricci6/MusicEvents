@@ -7,7 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.musicevents.data.database.Event
 import com.example.musicevents.data.database.User
 import com.example.musicevents.data.database.UserSaveEvent
 import com.example.musicevents.data.remote.EventApi

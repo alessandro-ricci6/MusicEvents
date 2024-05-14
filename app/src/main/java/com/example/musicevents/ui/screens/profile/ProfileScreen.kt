@@ -33,7 +33,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.platform.LocalContext
-import com.example.musicevents.data.database.Event
 import com.example.musicevents.data.remote.EventApi
 import com.example.musicevents.data.remote.JambaseSource
 import com.example.musicevents.ui.composable.EventItem

@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.intPreferencesKey
-import com.example.musicevents.data.database.Event
 import com.example.musicevents.data.database.UserSaveEvent
 import io.ktor.util.valuesOf
 import kotlinx.coroutines.CoroutineScope

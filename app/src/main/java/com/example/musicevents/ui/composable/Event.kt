@@ -35,7 +35,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.musicevents.data.database.Event
 import com.example.musicevents.data.remote.EventApi
 import com.example.musicevents.data.remote.Performer
 import com.example.musicevents.ui.screens.home.HomeActions
@@ -50,7 +49,6 @@ fun EventItem(item: EventApi, actions: HomeActions, userId: Int) {
     var eventSaved by remember { mutableStateOf(actions.isEventSaved(userId, item.id)) }
     var showSheet by remember { mutableStateOf(false) }
     val icon = if(eventSaved) Icons.Default.Favorite else Icons.Default.FavoriteBorder
-    val venue = "In ${item.location.name} in ${item.location.city.name}, ${item.location.city.county.name}"
     val performer:ArrayList<String> = emptyArray<String>().toCollection(ArrayList())
     item.performer.forEach { p ->
         performer.add(p.name)
@@ -84,8 +82,7 @@ fun EventItem(item: EventApi, actions: HomeActions, userId: Int) {
                 if (eventSaved) {
                     actions.deleteSavedEvents(item.id)
                 } else {
-                    val event = Event(id = item.id, name = item.name, venue = venue, date = item.date, imageUrl = item.imageUrl, performer = performer)
-                    actions.saveEvent(event)
+                    actions.saveEvent(item.id)
                 }
                 eventSaved = !eventSaved
             },

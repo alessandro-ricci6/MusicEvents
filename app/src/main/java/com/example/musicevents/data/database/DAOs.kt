@@ -9,11 +9,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EventsDAO {
-    @Query("SELECT * FROM Event")
-    fun getAll(): Flow<List<Event>>
-
-    @Upsert
-    suspend fun upsert(event: Event)
 
     @Upsert
     suspend fun userSaveEvent(userSaveEvent: UserSaveEvent)
@@ -21,17 +16,11 @@ interface EventsDAO {
     @Query("SELECT id FROM UserSaveEvent WHERE userId = :userId AND eventId = :eventId")
     fun getSavedEventId(userId: Int, eventId: String): List<Int>
 
-    @Query("SELECT Event.* FROM Event INNER JOIN UserSaveEvent ON Event.id = UserSaveEvent.eventId WHERE UserSaveEvent.userId = :userId")
-    fun getAllEventOfUser(userId: Int): List<Event>
-
-    @Query("DELETE FROM UserSaveEvent WHERE id = :id")
-    suspend fun deleteSavedEvent(id: Int)
+    @Query("DELETE FROM UserSaveEvent WHERE userId = :userId AND eventId = :eventId")
+    suspend fun deleteSavedEvent(userId: Int, eventId: String)
 
     @Query("SELECT * FROM UserSaveEvent WHERE userId = :userId AND eventId = :eventId")
     fun isEventSaved(userId: Int, eventId: String): List<UserSaveEvent>
-
-    @Delete
-    suspend fun delete(item: Event)
 }
 
 @Dao

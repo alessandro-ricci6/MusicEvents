@@ -5,14 +5,15 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.musicevents.data.database.Event
 import com.example.musicevents.data.repositories.EventsRepositories
+import com.example.musicevents.data.repositories.UserRepository
 import com.example.musicevents.ui.screens.login.LoginViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -26,7 +27,7 @@ data class HomeState(
     val showLocationPermissionPermanentlyDeniedSnackbar: Boolean = false,
 )
 interface HomeActions{
-    fun saveEvent(event: Event)
+    fun saveEvent(eventId: String)
     suspend fun isSaved(userId: Int, eventId: String): Boolean
     fun setShowLocationDisabledAlert(show: Boolean)
     fun setShowLocationPermissionDeniedAlert(show: Boolean)
@@ -37,17 +38,16 @@ interface HomeActions{
 
 class HomeViewModel(
     private val eventsRepositories: EventsRepositories,
-    private val loginViewModel: LoginViewModel
+    private val userRepository: UserRepository
 ): ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
     val state = _state.asStateFlow()
 
     val actions = object: HomeActions{
-        override fun saveEvent(event: Event) {
+        override fun saveEvent(eventId: String) {
             viewModelScope.launch {
-                eventsRepositories.upsert(event)
-                loginViewModel.userLogged.id?.let { eventsRepositories.userSaveEvent(it, event.id) }
+                eventsRepositories.userSaveEvent(userRepository.id.first(), eventId)
             }
         }
 
@@ -72,10 +72,8 @@ class HomeViewModel(
 
         override fun deleteSavedEvents(eventId: String) {
             viewModelScope.launch {
-                val userId: Int = loginViewModel.userLogged.id!!
-                val id = eventsRepositories.getSavedEventId(userId, eventId)
-                loginViewModel.userLogged.id?.let { eventsRepositories.deleteSavedEvent(id) }
-                Log.d("SAVED", "ViewModel")
+                val userId: Int = userRepository.id.first()
+                eventsRepositories.deleteSavedEvent(userId, eventId)
             }
         }
     }
