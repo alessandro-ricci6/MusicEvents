@@ -75,12 +75,12 @@ fun LoginDiv(
     TextField(value = email,
         onValueChange = { email = it },
         modifier = Modifier
-            .padding(top = 30.dp),
+            .padding(top = 20.dp),
         label = {Text(text = "Email")})
     TextField(
         value = password,
         modifier = Modifier
-            .padding(30.dp),
+            .padding(20.dp),
         trailingIcon = trailingIconView,
         onValueChange = { password = it },
         label = { Text("Password") },
@@ -134,17 +134,17 @@ fun RegisterScreen(
         value = email,
         onValueChange = { email = it },
         modifier = Modifier
-            .padding(top = 30.dp),
+            .padding(top = 20.dp),
         label = { Text(text = "Email") })
     TextField(value = name,
         onValueChange = { name = it },
         modifier = Modifier
-            .padding(top = 30.dp),
+            .padding(top = 20.dp),
         label = {Text(text = "Name")})
     TextField(
         value = password,
         modifier = Modifier
-            .padding(30.dp),
+            .padding(20.dp),
         trailingIcon = trailingIconView,
         onValueChange = { password = it },
         label = { Text("Password") },

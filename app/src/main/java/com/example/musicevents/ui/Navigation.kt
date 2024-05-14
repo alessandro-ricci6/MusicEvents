@@ -7,6 +7,7 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -53,6 +54,7 @@ fun MusicEventsNavGraph(
     val loginVm = koinViewModel<LoginViewModel>()
     val userState by loginVm.state.collectAsStateWithLifecycle()
     val userId: Int = loginVm.userLogged.id!!
+    val homeVm = koinViewModel<HomeViewModel>()
 
     NavHost(
         navController = navController,
@@ -61,7 +63,6 @@ fun MusicEventsNavGraph(
     ){
         with(MusicEventsRoute.Home) {
             composable(route) {
-                val homeVm = koinViewModel<HomeViewModel>()
                 val state by homeVm.state.collectAsStateWithLifecycle()
                 HomeScreen(homeVm.actions, state, userId)
             }
@@ -81,7 +82,8 @@ fun MusicEventsNavGraph(
         with(MusicEventsRoute.Profile){
             composable(route){
                 val profileVm = koinViewModel<ProfileViewModel>()
-                ProfileScreen(userId, profileVm.actions)
+                val eventsState by profileVm.state.collectAsState()
+                ProfileScreen(userId, profileVm.actions, eventsState, homeVm.actions)
             }
         }
     }

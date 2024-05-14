@@ -72,6 +72,12 @@ data class GenreResponse(
     val genres: List<Genre>
 )
 
+@Serializable
+data class SingleEvent(
+    @SerialName("event")
+    val event: EventApi
+)
+
 
 class JambaseSource(
     private val httpClient: HttpClient
@@ -98,6 +104,11 @@ class JambaseSource(
     suspend fun searchEventsFromGenre(genre: String): JamBaseResponse{
         val url = "${baseUrl}events?perPage=10&genreSlug=${genre}&apikey=${apiKey}"
 
+        return httpClient.get(url).body()
+    }
+
+    suspend fun getEvent(eventId: String): SingleEvent{
+        val url = "${baseUrl}events/id/${eventId}?apikey=${apiKey}"
         return httpClient.get(url).body()
     }
 }

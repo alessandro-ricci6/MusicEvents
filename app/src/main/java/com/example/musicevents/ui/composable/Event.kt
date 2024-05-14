@@ -45,12 +45,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventItem(item: EventApi, actions: HomeActions, userId: Int) {
-    var eventSaved by remember { mutableStateOf(false) }
+    var eventSaved by remember { mutableStateOf(actions.isEventSaved(userId, item.id)) }
     var showSheet by remember { mutableStateOf(false) }
-    eventSaved = actions.isEventSaved(userId, item.id)
     val icon = if(eventSaved) Icons.Default.Favorite else Icons.Default.FavoriteBorder
     val venue = "In ${item.location.name} in ${item.location.city.name}, ${item.location.city.county.name}"
     val performer:ArrayList<String> = emptyArray<String>().toCollection(ArrayList())
@@ -85,13 +83,11 @@ fun EventItem(item: EventApi, actions: HomeActions, userId: Int) {
             IconButton(onClick = {
                 if (eventSaved) {
                     actions.deleteSavedEvents(item.id)
-                    Log.d("SAVED", item.id)
                 } else {
                     val event = Event(id = item.id, name = item.name, venue = venue, date = item.date, imageUrl = item.imageUrl, performer = performer)
                     actions.saveEvent(event)
                 }
                 eventSaved = !eventSaved
-                Log.d("SAVED", eventSaved.toString())
             },
                 modifier = Modifier.padding(5.dp)) {
                 Icon(

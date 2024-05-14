@@ -45,6 +45,9 @@ interface UserDAO {
     @Query("SELECT User.id FROM User WHERE email = :email")
     fun getIdByEmail(email: String): Int
 
+    @Query("SELECT * FROM UserSaveEvent WHERE userId = :userId")
+    fun getSavedEventsOfUser(userId: Int): Flow<List<UserSaveEvent>>
+
     @Upsert
     suspend fun upsert(user: User)
 }

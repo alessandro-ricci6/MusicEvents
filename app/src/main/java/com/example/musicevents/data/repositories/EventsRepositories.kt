@@ -17,8 +17,6 @@ class EventsRepositories(
     private val contentResolver: ContentResolver,
     private val dataStore: DataStore<Preferences>
 ) {
-    val events: Flow<List<Event>> = eventsDAO.getAll()
-
     suspend fun upsert(event: Event) {
         eventsDAO.upsert(event)
     }
