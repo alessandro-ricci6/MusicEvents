@@ -101,13 +101,13 @@ class JambaseSource(
     private val date = SimpleDateFormat("yyyy-MM-dd").format(Date())
 
 
-    suspend fun searchEvents(artistName: String): JamBaseResponse{
-        val url = "${baseUrl}events?eventDateFrom=${date}&perPage=10&artistName=${artistName}&apikey=${apiKey}"
+    suspend fun searchEvents(artistName: String, page: Int): JamBaseResponse{
+        val url = "${baseUrl}events?eventDateFrom=${date}&page=$page&perPage=10&artistName=${artistName}&apikey=${apiKey}"
         return httpClient.get(url).body()
     }
 
-    suspend fun searchFromCoordinates(coordinates: Coordinates): JamBaseResponse{
-        val url = "${baseUrl}events?eventDateFrom=${date}&perPage=10&geoLatitude=${coordinates.latitude}&geoLongitude=${coordinates.longitude}" +
+    suspend fun searchFromCoordinates(coordinates: Coordinates, page: Int): JamBaseResponse{
+        val url = "${baseUrl}events?eventDateFrom=${date}&page=$page&perPage=10&geoLatitude=${coordinates.latitude}&geoLongitude=${coordinates.longitude}" +
                 "&geoRadiusAmount=100&geoRadiusUnits=km&apikey=${apiKey}"
         return httpClient.get(url).body()
     }
@@ -117,8 +117,8 @@ class JambaseSource(
         return httpClient.get(url).body()
     }
 
-    suspend fun searchEventsFromGenre(genre: String): JamBaseResponse{
-        val url = "${baseUrl}events?eventDateFrom=${date}&perPage=10&genreSlug=${genre}&apikey=${apiKey}"
+    suspend fun searchEventsFromGenre(genre: String, page:Int): JamBaseResponse{
+        val url = "${baseUrl}events?eventDateFrom=${date}&page=$page&perPage=10&genreSlug=${genre}&apikey=${apiKey}"
 
         return httpClient.get(url).body()
     }

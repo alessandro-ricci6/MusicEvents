@@ -7,10 +7,12 @@ import android.provider.Settings
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -21,11 +23,9 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -41,8 +41,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.musicevents.R
 import com.example.musicevents.data.remote.EventApi
 import com.example.musicevents.data.remote.Genre
 import com.example.musicevents.data.remote.JamBaseResponse
@@ -65,6 +69,10 @@ fun HomeScreen(
     var eventList by remember { mutableStateOf<List<EventApi>>(emptyList()) }
     var genreList by remember { mutableStateOf<List<Genre>>(emptyList()) }
     var searchInput by remember { mutableStateOf("") }
+    var actPage by remember { mutableStateOf(1) }
+    var lastOP: Int? = null
+    var lastQuery: String = ""
+    var lastGenre: String = ""
     val snackbarHostState = remember { SnackbarHostState() }
     var events by remember { mutableStateOf<JamBaseResponse?>(null) }
     var isLoading by remember { mutableStateOf(false) }
@@ -89,16 +97,50 @@ fun HomeScreen(
         }
     }
 
+    //Location
+
+    val locationService = koinInject<LocationService>()
+
+    val locationPermission = rememberPermission(
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    ) { status ->
+        when (status) {
+            PermissionStatus.Granted ->
+                locationService.requestCurrentLocation()
+
+            PermissionStatus.Denied ->
+                actions.setShowLocationPermissionDeniedAlert(true)
+
+            PermissionStatus.PermanentlyDenied ->
+                actions.setShowLocationPermissionPermanentlyDeniedSnackbar(true)
+
+            PermissionStatus.Unknown -> {}
+        }
+    }
+
+    fun requestLocation(){
+        if (locationPermission.status.isGranted) {
+            locationService.requestCurrentLocation()
+        } else {
+            locationPermission.launchPermissionRequest()
+        }
+    }
+    LaunchedEffect(locationService.isLocationEnabled) {
+        actions.setShowLocationDisabledAlert(locationService.isLocationEnabled == false)
+    }
+
     //Api
     val jambaseDataSource = koinInject<JambaseSource>()
 
     val coroutineScope = rememberCoroutineScope()
-    fun searchEventsFromName() = coroutineScope.launch {
+    fun searchEventsFromName(query: String) = coroutineScope.launch {
+        lastOP = 1
+        lastQuery = query
         isLoading = true
         eventList = emptyList()
         if (isOnline()) {
             try {
-                val res = jambaseDataSource.searchEvents(searchInput)
+                val res = jambaseDataSource.searchEvents(query, actPage)
                 events = res
                 if (res.events.isNotEmpty()) {
                     eventList = res.events
@@ -121,12 +163,16 @@ fun HomeScreen(
             }
         }
     }
-    fun searchFromCoordinates(coordinates: Coordinates) = coroutineScope.launch {
+    fun searchFromCoordinates() = coroutineScope.launch {
+        lastOP = 2
         isLoading = true
         eventList = emptyList()
-        if (isOnline()) {
+        requestLocation()
+        delay(1000)
+        val coordinate = locationService.coordinates
+        if (isOnline() && coordinate != null) {
             try {
-                val res = jambaseDataSource.searchFromCoordinates(coordinates)
+                val res = jambaseDataSource.searchFromCoordinates(coordinate, actPage)
                 events = res
                 if (res.events.isNotEmpty()) {
                     eventList = res.events
@@ -173,12 +219,16 @@ fun HomeScreen(
     }
 
     fun searchEventsFromGenre(genre: String) = coroutineScope.launch {
+        lastOP = 3
+        lastGenre = genre
         isLoading = true
+        Log.d("PAGE", genre)
         eventList = emptyList()
         if (isOnline()) {
             try {
-                val res = jambaseDataSource.searchEventsFromGenre(genre)
+                val res = jambaseDataSource.searchEventsFromGenre(genre, actPage)
                 events = res
+                Log.d("PAGE", res.events.size.toString())
                 if (res.events.isNotEmpty()) {
                     eventList = res.events
                 } else {
@@ -201,42 +251,12 @@ fun HomeScreen(
         }
     }
 
-    //Location
-
-    val locationService = koinInject<LocationService>()
-
-    val locationPermission = rememberPermission(
-        Manifest.permission.ACCESS_COARSE_LOCATION
-    ) { status ->
-        when (status) {
-            PermissionStatus.Granted ->
-                locationService.requestCurrentLocation()
-
-            PermissionStatus.Denied ->
-                actions.setShowLocationPermissionDeniedAlert(true)
-
-            PermissionStatus.PermanentlyDenied ->
-                actions.setShowLocationPermissionPermanentlyDeniedSnackbar(true)
-
-            PermissionStatus.Unknown -> {}
-        }
-    }
-
-    fun requestLocation(){
-        if (locationPermission.status.isGranted) {
-            locationService.requestCurrentLocation()
-        } else {
-            locationPermission.launchPermissionRequest()
-        }
-    }
-    LaunchedEffect(locationService.isLocationEnabled) {
-        actions.setShowLocationDisabledAlert(locationService.isLocationEnabled == false)
-    }
-
     Column {
         val searchBtn = @Composable {
             IconButton(
-                onClick = ::searchEventsFromName,
+                onClick = {
+                    actPage = 1
+                    searchEventsFromName(searchInput) },
             ) {
                 Icon(
                     Icons.Default.Search,
@@ -249,12 +269,8 @@ fun HomeScreen(
         val locaBtn = @Composable {
             IconButton(onClick = {
                 coroutineScope.launch {
-                    requestLocation()
-                    delay(1000)
-                    val coordinate = locationService.coordinates  // Get coordinates directly
-                    if (coordinate != null) {
-                        searchFromCoordinates(coordinate)
-                    }
+                    actPage = 1
+                    searchFromCoordinates()
                 }
             }) {
                 Icon(
@@ -350,23 +366,62 @@ fun HomeScreen(
             }
         }
 
-        if(eventList.isNotEmpty()){
-            LazyColumn(
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 0.dp),
-            ) {
-                items(eventList) { item ->
-                    EventItem(item = item, actions, userId)
+            if(eventList.isNotEmpty()){
+                LazyColumn(
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp, vertical = 0.dp)
+                        .weight(1f),
+                ) {
+                    items(eventList) { item ->
+                        EventItem(item = item, actions, userId)
+                    }
                 }
+                Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                    IconButton(onClick = { actPage -= 1
+                        if(lastOP == 1){
+                            searchEventsFromName(lastQuery)
+                        } else if(lastOP == 2){
+                            searchEventsFromGenre(lastGenre)
+                        } else {
+                            searchFromCoordinates()
+                        }},
+                        enabled = actPage != 1,
+                        modifier = Modifier.align(Alignment.CenterVertically)) {
+                        Icon(
+                            ImageVector.vectorResource(id = R.drawable.arrow_back),
+                            modifier = Modifier.size(80.dp),
+                            contentDescription = "Previous Page")
+                    }
+                    Text(text = actPage.toString(),
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(horizontal = 10.dp),
+                        fontSize = 20.sp)
+                    IconButton(onClick = { actPage += 1
+                        if(lastOP == 1){
+                            searchEventsFromName(lastQuery)
+                        } else if(lastOP == 2){
+                            searchEventsFromGenre(lastGenre)
+                        } else {
+                            searchFromCoordinates()
+                        }},
+                        modifier = Modifier.align(Alignment.CenterVertically)) {
+                        Icon(
+                            ImageVector.vectorResource(id = R.drawable.arrow_ahead),
+                            modifier = Modifier.size(80.dp),
+                            contentDescription = "Next Page")
+                    }
+                }
+            } else if (isLoading) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 30.dp))
             }
-        } else if (isLoading) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 30.dp))
-        }
-        else {
-            NoEventsFound()
-        }
+            else {
+                NoEventsFound()
+            }
+
     }
 
 }

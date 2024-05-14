@@ -71,17 +71,6 @@ fun GenreFilter(){
         }
     }
 
-    fun searchFromGenre() = coroutineScope.launch {
-        if (isOnline()){
-            try{
-                val res = jambaseDataSource.searchEventsFromGenre("rock")
-
-            } catch (e: Exception){
-
-            }
-        }
-    }
-
     getAllGenres()
     Text(text = genreList.size.toString())
 }
