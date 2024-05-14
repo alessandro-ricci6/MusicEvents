@@ -1,5 +1,9 @@
 package com.example.musicevents.ui.composable
 
+import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
+import android.provider.CalendarContract
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
@@ -40,18 +44,64 @@ import com.example.musicevents.data.remote.Performer
 import com.example.musicevents.ui.screens.home.HomeActions
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat.startActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.TimeZone
 
+@SuppressLint("SimpleDateFormat")
 @Composable
 fun EventItem(item: EventApi, actions: HomeActions, userId: Int) {
     var eventSaved by remember { mutableStateOf(actions.isEventSaved(userId, item.id)) }
     var showSheet by remember { mutableStateOf(false) }
     val icon = if(eventSaved) Icons.Default.Favorite else Icons.Default.FavoriteBorder
+    val location = "${item.location.name}, ${item.location.city.name}, ${item.location.city.county.name}"
     val performer:ArrayList<String> = emptyArray<String>().toCollection(ArrayList())
     item.performer.forEach { p ->
         performer.add(p.name)
+    }
+
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+    dateFormat.timeZone = TimeZone.getDefault()
+    val parsedDate = try {
+        dateFormat.parse(item.date)
+    } catch (e: ParseException) {
+        Log.e("Calendar Error", "Failed to parse date", e)
+        return
+    }
+    val date = parsedDate.time + 86400000
+
+    val ctx = LocalContext.current
+    fun addInCalendar(){
+        Log.d("DATE", date.toString())
+        val intent = Intent(Intent.ACTION_INSERT)
+            .setData(Uri.parse("content://com.android.calendar/events"))
+            .putExtra(CalendarContract.Events.TITLE, item.name)
+            .putExtra(CalendarContract.Events.EVENT_LOCATION, location)
+            .putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, true)
+            .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, date)
+        ctx.startActivity(intent)
+    }
+
+    fun formatDate(dateString: String): String {
+        Log.d("DATE1", dateString)
+        if(dateString.length > 11){
+            Log.d("DATE2", dateString)
+            val newDate = LocalDateTime.parse(dateString, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
+            return newDate.format(DateTimeFormatter.ofPattern("EEEE yyyy-MM-dd 'at' HH:mm"))
+        }
+        return dateString
+    }
+
+    fun openOnMap(){
+        val mapIntent = Intent(Intent.ACTION_VIEW, Uri.parse("geo:${item.location.geo.latitude},${item.location.geo.longitude}?q=${item.location.name}"))
+        ctx.startActivity(mapIntent)
     }
 
     if (showSheet) {
@@ -105,17 +155,33 @@ fun EventItem(item: EventApi, actions: HomeActions, userId: Int) {
                 .border(BorderStroke(3.dp, Color.Black))
         )
         Text(
-            text = "In ${item.location.city.name}, ${item.location.city.county.name} on ${item.date}",
+            text = "In ${item.location.city.name}, ${item.location.city.county.name} on ${formatDate(item.date)}",
             modifier = Modifier
                 .padding(10.dp),
             fontSize = 15.sp
         )
 
-        Button(onClick = { showSheet = true },
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp)) {
+            Button(onClick = { showSheet = true },
+                modifier = Modifier
+                    .padding(5.dp)
+                    .weight(1f)) {
+                Text(text = "See performer")
+            }
+            Button(onClick = { addInCalendar() },
+                modifier = Modifier
+                    .padding(5.dp)
+                    .weight(1f)) {
+                Text(text = "Add to calendar")
+            }
+        }
+        Button(onClick = { openOnMap() },
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(bottom = 5.dp)) {
-            Text(text = "See performer")
+                .padding(5.dp)
+                .align(Alignment.CenterHorizontally)) {
+            Text(text = "See on map")
         }
     }
 }

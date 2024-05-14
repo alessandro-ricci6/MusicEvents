@@ -279,7 +279,7 @@ fun HomeScreen(
 
         Row(modifier = Modifier.padding(horizontal = 5.dp)) {
             getAllGenres()
-            Text(text = "Select the genre:", modifier = Modifier.align(Alignment.CenterVertically))
+            Text(text = "Search by genre:", modifier = Modifier.align(Alignment.CenterVertically))
             LazyRow {
                 items(genreList) {item ->
                     Button(onClick = { searchEventsFromGenre(item.identifier) }, modifier = Modifier.padding(5.dp)) {
@@ -359,10 +359,10 @@ fun HomeScreen(
                 }
             }
         } else if (isLoading) {
-            // Show loading indicator while initially fetching events (optional)
             CircularProgressIndicator(color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
-                    .align(Alignment.CenterHorizontally))
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 30.dp))
         }
         else {
             NoEventsFound()

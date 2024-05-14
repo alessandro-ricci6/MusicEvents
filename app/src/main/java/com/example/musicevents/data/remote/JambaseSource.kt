@@ -1,5 +1,6 @@
 package com.example.musicevents.data.remote
 
+import android.annotation.SuppressLint
 import android.util.Log
 import com.example.musicevents.utils.Coordinates
 import io.ktor.client.HttpClient
@@ -7,6 +8,8 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.text.SimpleDateFormat
+import java.util.Date
 
 @Serializable
 data class Country(
@@ -23,11 +26,21 @@ data class City(
 )
 
 @Serializable
+data class Geo(
+    @SerialName("latitude")
+    val latitude: Double,
+    @SerialName("longitude")
+    val longitude: Double
+)
+
+@Serializable
 data class Location(
     @SerialName("name")
     val name: String,
     @SerialName("address")
-    val city: City
+    val city: City,
+    @SerialName("geo")
+    val geo: Geo
 )
 
 @Serializable
@@ -40,7 +53,7 @@ data class Performer(
 data class EventApi(
     @SerialName("name")
     val name: String,
-    @SerialName("endDate")
+    @SerialName("startDate")
     val date: String,
     @SerialName("image")
     val imageUrl: String,
@@ -84,14 +97,17 @@ class JambaseSource(
 ) {
     private val baseUrl = "https://www.jambase.com/jb-api/v1/"
     private val apiKey = "e066c7bf-35dc-426e-a839-250784bb72ac"
+    @SuppressLint("SimpleDateFormat")
+    private val date = SimpleDateFormat("yyyy-MM-dd").format(Date())
+
 
     suspend fun searchEvents(artistName: String): JamBaseResponse{
-        val url = "${baseUrl}events?perPage=10&artistName=${artistName}&apikey=${apiKey}"
+        val url = "${baseUrl}events?eventDateFrom=${date}&perPage=10&artistName=${artistName}&apikey=${apiKey}"
         return httpClient.get(url).body()
     }
 
     suspend fun searchFromCoordinates(coordinates: Coordinates): JamBaseResponse{
-        val url = "${baseUrl}events?perPage=10&geoLatitude=${coordinates.latitude}&geoLongitude=${coordinates.longitude}" +
+        val url = "${baseUrl}events?eventDateFrom=${date}&perPage=10&geoLatitude=${coordinates.latitude}&geoLongitude=${coordinates.longitude}" +
                 "&geoRadiusAmount=100&geoRadiusUnits=km&apikey=${apiKey}"
         return httpClient.get(url).body()
     }
@@ -102,7 +118,7 @@ class JambaseSource(
     }
 
     suspend fun searchEventsFromGenre(genre: String): JamBaseResponse{
-        val url = "${baseUrl}events?perPage=10&genreSlug=${genre}&apikey=${apiKey}"
+        val url = "${baseUrl}events?eventDateFrom=${date}&perPage=10&genreSlug=${genre}&apikey=${apiKey}"
 
         return httpClient.get(url).body()
     }

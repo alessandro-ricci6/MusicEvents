@@ -54,7 +54,6 @@ class LoginViewModel (
             users.forEach{user ->
                 if (user.email == email && user.password == pass){
                     setUser(user.id)
-                    Log.d("USERLOGGED", userLogged.id.toString())
                     return true
                 }
             }
