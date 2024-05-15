@@ -48,7 +48,7 @@ import org.koin.compose.koinInject
 fun ProfileScreen(
     userId: Int,
     actions: ProfileActions,
-    eventsState: EventsState,
+    profileState: ProfileState,
     homeActions: HomeActions
 ){
     val user = actions.getUserById(userId)
@@ -56,6 +56,7 @@ fun ProfileScreen(
     var eventList by remember { mutableStateOf<List<EventApi>>(emptyList()) }
     val jambaseDataSource = koinInject<JambaseSource>()
     val coroutineScope = rememberCoroutineScope()
+    Log.d("STATE", profileState.events.size.toString())
 
     LaunchedEffect(Unit) {
         if (!actions.isOnline()) {
@@ -86,10 +87,8 @@ fun ProfileScreen(
         }
     }
 
-    eventsState.events.forEach { event ->
-        LaunchedEffect(event) {
-            getEvents(event.eventId)
-        }
+    profileState.events.forEach { event ->
+        getEvents(event.eventId)
     }
 
     Scaffold(
@@ -110,7 +109,6 @@ fun ProfileScreen(
                 LazyColumn(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 0.dp),
                 ) {
-                    Log.d("LIST", eventsState.events.size.toString())
                     items(eventList) {item ->
                         EventItem(item = item, actions = homeActions, userId = userId)
                     }

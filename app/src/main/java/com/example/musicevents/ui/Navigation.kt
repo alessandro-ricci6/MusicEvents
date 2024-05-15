@@ -82,8 +82,8 @@ fun MusicEventsNavGraph(
         with(MusicEventsRoute.Profile){
             composable(route){
                 val profileVm = koinViewModel<ProfileViewModel>()
-                val eventsState by profileVm.eventState.collectAsState()
-                ProfileScreen(userId, profileVm.actions, eventsState, homeVm.actions)
+                val profileState by profileVm.state.collectAsState()
+                ProfileScreen(userId, profileVm.actions, profileState, homeVm.actions)
             }
         }
     }

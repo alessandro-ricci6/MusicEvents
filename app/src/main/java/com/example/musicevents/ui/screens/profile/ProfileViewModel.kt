@@ -15,9 +15,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-data class ProfileState(val showNoInternetConnectivitySnackbar: Boolean = false)
-
-data class EventsState(val events: List<UserSaveEvent>)
+data class ProfileState(
+    val showNoInternetConnectivitySnackbar: Boolean = false,
+    var events: List<UserSaveEvent>)
 
 interface ProfileActions {
     fun getUserById(userId: Int): User
@@ -30,20 +30,17 @@ class ProfileViewModel(
     private val internet: InternetService,
     private val userRepository: UserRepository,
 ) : ViewModel() {
-    private val _state = MutableStateFlow(ProfileState())
+    private val _state = MutableStateFlow(ProfileState(events = emptyList()))
     val state = _state.asStateFlow()
 
-    private val _eventState = MutableStateFlow(EventsState(emptyList()))
     init {
         viewModelScope.launch {
             val userId = userRepository.id.first()
             val eventsFlow = userRepository.getEventsOfUser(userId)
-            val eventState = EventsState(eventsFlow.first())
-            _eventState.value = eventState
+            _state.value.events = eventsFlow.first()
         }
     }
 
-    val eventState: StateFlow<EventsState> = _eventState.asStateFlow()
 
 
 
