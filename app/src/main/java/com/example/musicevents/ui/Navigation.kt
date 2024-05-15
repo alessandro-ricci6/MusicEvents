@@ -53,13 +53,13 @@ fun MusicEventsNavGraph(
     //val placesState by placesVm.state.collectAsStateWithLifecycle()
     val loginVm = koinViewModel<LoginViewModel>()
     val userState by loginVm.state.collectAsStateWithLifecycle()
-    val userId: Int = loginVm.userLogged.id!!
     val homeVm = koinViewModel<HomeViewModel>()
     val userVm = koinViewModel<UserViewModel>()
+    val userId = userVm.userId.collectAsStateWithLifecycle().value
 
     NavHost(
         navController = navController,
-        startDestination = if (loginVm.userLogged.id != 0) MusicEventsRoute.Home.route else MusicEventsRoute.Login.route,
+        startDestination = if (userId != 0) MusicEventsRoute.Home.route else MusicEventsRoute.Login.route,
         modifier = modifier
     ){
         with(MusicEventsRoute.Home) {

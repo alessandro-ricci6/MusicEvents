@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musicevents.data.database.User
 import com.example.musicevents.data.repositories.UserRepository
+import com.example.musicevents.ui.UserViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
@@ -17,16 +18,16 @@ import kotlinx.coroutines.launch
 
 //Data class
 data class UserState(val users: List<User>)
-data class UserLogged(val id: Int?)
 
 //Action interface
 interface LoginActions {
-    fun onLoginClick(email: String, pass: String, users: List<User>): Boolean
-    fun onRegisterClick(name: String, pass: String, email: String, users: List<User>): Boolean
+    fun onLoginClick(email: String, pass: String): Boolean
+    fun onRegisterClick(name: String, pass: String, email: String): Boolean
 }
 
 class LoginViewModel (
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val userVm: UserViewModel
 ): ViewModel() {
     var state = userRepository.users.map { UserState(users = it) }.stateIn(
         scope = viewModelScope,
@@ -34,34 +35,20 @@ class LoginViewModel (
         initialValue = UserState(emptyList())
     )
 
-    var userLogged by mutableStateOf(UserLogged(0))
-        private set
-
-    fun setUser(id: Int){
-        userLogged = UserLogged(id)
-        viewModelScope.launch { userRepository.setUser(id) }
-    }
-
-    init {
-        viewModelScope.launch{
-            userLogged = UserLogged(userRepository.id.first())
-        }
-    }
-
     val actions = object: LoginActions {
 
-        override fun onLoginClick(email: String, pass: String, users: List<User>): Boolean {
-            users.forEach{user ->
+        override fun onLoginClick(email: String, pass: String): Boolean {
+            state.value.users.forEach{user ->
                 if (user.email == email && user.password == pass){
-                    setUser(user.id)
+                    userVm.setUser(user.id)
                     return true
                 }
             }
             return false
         }
 
-        override fun onRegisterClick(name: String, pass: String, email: String, users: List<User>):Boolean {
-            users.forEach { user ->
+        override fun onRegisterClick(name: String, pass: String, email: String):Boolean {
+            state.value.users.forEach { user ->
                 if(user.email == email || user.name == name) {
                     return false
                 }
@@ -69,7 +56,7 @@ class LoginViewModel (
             viewModelScope.launch(Dispatchers.IO) {
                 userRepository.upsert(User(name = name, password = pass, email = email))
                 val id = userRepository.getIdFromEmail(email)
-                setUser(id)
+                userVm.setUser(id)
             }
             return true
         }

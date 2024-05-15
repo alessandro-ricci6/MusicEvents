@@ -42,7 +42,7 @@ fun LoginScreen(
             .fillMaxSize()
     ) {
         LoginDiv(navHostController, state, actions)
-        RegisterScreen(navHostController, state, actions)
+        RegisterScreen(navHostController, actions)
 
     }
 }
@@ -90,12 +90,10 @@ fun LoginDiv(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
     )
     Button(onClick = {
-        if (actions.onLoginClick(email, password, state.users)){
+        if (actions.onLoginClick(email, password)){
             navController.navigate(MusicEventsRoute.Home.route)
         } else {
-            state.users.forEach{user ->
-                resultText += "${user.email} - ${user.password}\n"
-            }
+            resultText = "Try again"
         }
         //resultText = if(LoginViewModel().onLoginClick(name, password))"Hello $name" else "Try again"
     }) {
@@ -107,7 +105,6 @@ fun LoginDiv(
 @Composable
 fun RegisterScreen(
     navController: NavHostController,
-    state: UserState,
     actions: LoginActions
 ){
     var email by remember { mutableStateOf("") }
@@ -154,7 +151,7 @@ fun RegisterScreen(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
     )
     Button(onClick = {
-        if(actions.onRegisterClick(name, password, email, state.users)){
+        if(actions.onRegisterClick(name, password, email)){
             navController.navigate(MusicEventsRoute.Home.route)
         } else {
             resultText = "User yet registered"

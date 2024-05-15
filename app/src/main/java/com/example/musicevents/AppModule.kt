@@ -67,7 +67,7 @@ val appModule = module {
 
     single { LocationService(get()) }
 
-    viewModel { LoginViewModel(get()) }
+    viewModel { LoginViewModel(get(), get()) }
     viewModel {SettingsViewModel(get())}
     viewModel {HomeViewModel(get(), get())}
     viewModel {ProfileViewModel(get(), get())}

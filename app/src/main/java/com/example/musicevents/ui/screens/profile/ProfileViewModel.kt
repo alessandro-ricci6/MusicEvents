@@ -31,7 +31,7 @@ interface ProfileActions {
 
 class ProfileViewModel(
     private val eventsRepositories: EventsRepositories,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(EventsState(emptyList()))
