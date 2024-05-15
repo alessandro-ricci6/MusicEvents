@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -35,15 +36,18 @@ fun LoginScreen(
     state: UserState,
     actions: LoginActions
 ){
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .padding(20.dp)
-            .fillMaxSize()
-    ) {
-        LoginDiv(navHostController, state, actions)
-        RegisterScreen(navHostController, actions)
+    Scaffold {contentPadding ->
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .padding(20.dp)
+                .fillMaxSize()
+                .padding(contentPadding)
+        ) {
+            LoginDiv(navHostController, state, actions)
+            RegisterScreen(navHostController, actions)
 
+        }
     }
 }
 

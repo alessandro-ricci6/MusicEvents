@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,39 +40,41 @@ fun SettingsScreen(
     userActions: UserActions
 ) {
     var username by remember { mutableStateOf("") }
-    Column() {
-        ThemeDropDown(action, themeState)
-        HorizontalDivider()
-        OutlinedTextField(value = username,
-            onValueChange = {username = it},
-            label = { Text(text = "Username") },
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(5.dp),
-            trailingIcon = {
-                IconButton(onClick = {
-                    userActions.changeUsername(username)
-                }) {
-                    Icon(
-                        Icons.Default.Check,
-                        contentDescription = "Change username"
-                    )
-                }
-            })
-        HorizontalDivider()
-        ListItem(
-            headlineContent = { TextButton(
-                onClick = { action.logOut()
-                    navHostController.navigate(MusicEventsRoute.Login.route)},
-                modifier = Modifier.fillMaxSize()) {
-                Text(text = "Log out")
-            } },
-            modifier = Modifier
-                .height(75.dp)
-                .fillMaxWidth()
-        )
-        HorizontalDivider()
+    Scaffold(){ contentPadding ->
+        Column(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
+            ThemeDropDown(action, themeState)
+            HorizontalDivider()
+            OutlinedTextField(value = username,
+                onValueChange = {username = it},
+                label = { Text(text = "Username") },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(vertical = 10.dp),
+                trailingIcon = {
+                    IconButton(onClick = {
+                        userActions.changeUsername(username)
+                    }) {
+                        Icon(
+                            Icons.Default.Check,
+                            contentDescription = "Change username"
+                        )
+                    }
+                })
+            HorizontalDivider()
+            ListItem(
+                headlineContent = { TextButton(
+                    onClick = { action.logOut()
+                        navHostController.navigate(MusicEventsRoute.Login.route)},
+                    modifier = Modifier.fillMaxSize()) {
+                    Text(text = "Log out")
+                } },
+                modifier = Modifier
+                    .height(75.dp)
+                    .fillMaxWidth()
+            )
+            HorizontalDivider()
 
+        }
     }
 }
 

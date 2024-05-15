@@ -13,6 +13,7 @@ import com.example.musicevents.ui.screens.home.HomeViewModel
 import com.example.musicevents.ui.screens.login.LoginViewModel
 import com.example.musicevents.ui.screens.profile.ProfileViewModel
 import com.example.musicevents.ui.screens.settings.SettingsViewModel
+import com.example.musicevents.utils.InternetService
 import com.example.musicevents.utils.LocationService
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -66,10 +67,11 @@ val appModule = module {
     }
 
     single { LocationService(get()) }
+    single { InternetService(get()) }
 
     viewModel { LoginViewModel(get(), get()) }
     viewModel {SettingsViewModel(get())}
-    viewModel {HomeViewModel(get(), get())}
+    viewModel {HomeViewModel(get(), get(), get())}
     viewModel {ProfileViewModel(get(), get())}
     viewModel {UserViewModel(get())}
 }

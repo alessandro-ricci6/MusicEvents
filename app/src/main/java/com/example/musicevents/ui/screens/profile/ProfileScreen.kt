@@ -23,7 +23,9 @@ import com.example.musicevents.R
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.TextField
@@ -50,42 +52,27 @@ fun ProfileScreen(
     homeActions: HomeActions
 ){
     val user = actions.getUserById(userId)
-    //val userEvents = actions.getEventsOfUser(userId)
     val snackbarHostState = remember { SnackbarHostState() }
     var eventList by remember { mutableStateOf<List<EventApi>>(emptyList()) }
-    //Log.d("EVENTS", userEvents.size.toString())
-
-    //Internet
-    val ctx = LocalContext.current
-    fun isOnline(): Boolean {
-        val connectivityManager = ctx
-            .applicationContext
-            .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val capabilities =
-            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-        return capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true ||
-                capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
-    }
-    fun openWirelessSettings() {
-        val intent = Intent(Settings.ACTION_WIRELESS_SETTINGS).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        }
-        if (intent.resolveActivity(ctx.applicationContext.packageManager) != null) {
-            ctx.applicationContext.startActivity(intent)
-        }
-    }
-
     val jambaseDataSource = koinInject<JambaseSource>()
     val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        if (!actions.isOnline()) {
+            actions.setShowNoInternetConnectivitySnackbar(true)
+            return@LaunchedEffect
+        }
+    }
+
     fun getEvents(eventId: String) =  coroutineScope.launch {
-        if (isOnline()) {
+        if (actions.isOnline()) {
             try {
                 val res = jambaseDataSource.getEvent(eventId)
                 eventList += res.event
             } catch (e: Exception) {
-                // Handle errors gracefully (optional: show error message or retry option)
+                // TODO
             } finally {
-                // Set loading state to false after finishing API call
+                // TODO
             }
         } else {
             val res = snackbarHostState.showSnackbar(
@@ -94,7 +81,7 @@ fun ProfileScreen(
                 duration = SnackbarDuration.Long
             )
             if (res == SnackbarResult.ActionPerformed) {
-                openWirelessSettings()
+                actions.openWirelessSettings()
             }
         }
     }
@@ -105,28 +92,32 @@ fun ProfileScreen(
         }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        AsyncImage(model = R.drawable.def_profile, contentDescription = "Profile Image",
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(10.dp)
-                .clip(CircleShape)
-                .size(120.dp))
-        Text(text = user.name, modifier = Modifier.align(Alignment.CenterHorizontally))
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ){contentPadding ->
+        Column(
+            modifier = Modifier.padding(contentPadding).fillMaxSize()
+        ) {
+            AsyncImage(model = R.drawable.def_profile, contentDescription = "Profile Image",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(10.dp)
+                    .clip(CircleShape)
+                    .size(120.dp))
+            Text(text = user.name, modifier = Modifier.align(Alignment.CenterHorizontally))
 
-        if(eventList.isNotEmpty()){
-            LazyColumn(
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 0.dp),
-            ) {
-                Log.d("LIST", eventsState.events.size.toString())
-                items(eventList) {item ->
-                    EventItem(item = item, actions = homeActions, userId = userId)
+            if(eventList.isNotEmpty()){
+                LazyColumn(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 0.dp),
+                ) {
+                    Log.d("LIST", eventsState.events.size.toString())
+                    items(eventList) {item ->
+                        EventItem(item = item, actions = homeActions, userId = userId)
+                    }
                 }
+            } else {
+                Text(text = "No events Saved", modifier = Modifier.align(Alignment.CenterHorizontally))
             }
-        } else {
-            Text(text = "No events Saved", modifier = Modifier.align(Alignment.CenterHorizontally))
         }
     }
 }

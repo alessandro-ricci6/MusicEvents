@@ -1,30 +1,23 @@
 package com.example.musicevents.ui.screens.home
 
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicevents.data.repositories.EventsRepositories
 import com.example.musicevents.data.repositories.UserRepository
-import com.example.musicevents.ui.screens.login.LoginViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.Flow
+import com.example.musicevents.utils.InternetService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
-import okhttp3.internal.wait
 
 data class HomeState(
     val showLocationDisabledAlert: Boolean = false,
     val showLocationPermissionDeniedAlert: Boolean = false,
     val showLocationPermissionPermanentlyDeniedSnackbar: Boolean = false,
+    val showNoInternetConnectivitySnackbar: Boolean = false
 )
 interface HomeActions{
     fun saveEvent(eventId: String)
@@ -32,13 +25,17 @@ interface HomeActions{
     fun setShowLocationDisabledAlert(show: Boolean)
     fun setShowLocationPermissionDeniedAlert(show: Boolean)
     fun setShowLocationPermissionPermanentlyDeniedSnackbar(show: Boolean)
+    fun setShowNoInternetConnectivitySnackbar(show: Boolean)
     fun isEventSaved(userId: Int, eventId: String): Boolean
     fun deleteSavedEvents(eventId: String)
+    fun isOnline(): Boolean
+    fun openWirelessSettings()
 }
 
 class HomeViewModel(
     private val eventsRepositories: EventsRepositories,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val internet: InternetService
 ): ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -64,6 +61,9 @@ class HomeViewModel(
         override fun setShowLocationPermissionPermanentlyDeniedSnackbar(show: Boolean) =
             _state.update { it.copy(showLocationPermissionPermanentlyDeniedSnackbar = show) }
 
+        override fun setShowNoInternetConnectivitySnackbar(show: Boolean) =
+            _state.update { it.copy(showNoInternetConnectivitySnackbar = show) }
+
         override fun isEventSaved(userId: Int, eventId: String):Boolean {
             val result = runBlocking { eventsRepositories.isEventSaved(userId, eventId) }
             Log.d("RESULT", result.toString())
@@ -75,6 +75,14 @@ class HomeViewModel(
                 val userId: Int = userRepository.id.first()
                 eventsRepositories.deleteSavedEvent(userId, eventId)
             }
+        }
+
+        override fun isOnline(): Boolean {
+            return internet.isOnline()
+        }
+
+        override fun openWirelessSettings() {
+            internet.openWirelessSettings()
         }
     }
 }

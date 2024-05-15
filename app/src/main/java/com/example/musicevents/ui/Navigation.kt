@@ -1,6 +1,5 @@
 package com.example.musicevents.ui
 
-import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Lock
@@ -83,7 +82,7 @@ fun MusicEventsNavGraph(
         with(MusicEventsRoute.Profile){
             composable(route){
                 val profileVm = koinViewModel<ProfileViewModel>()
-                val eventsState by profileVm.state.collectAsState()
+                val eventsState by profileVm.eventState.collectAsState()
                 ProfileScreen(userId, profileVm.actions, eventsState, homeVm.actions)
             }
         }

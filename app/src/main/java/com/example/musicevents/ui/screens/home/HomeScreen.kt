@@ -1,11 +1,8 @@
 package com.example.musicevents.ui.screens.home
 
 import android.Manifest
-import android.content.Context.CONNECTIVITY_SERVICE
 import android.content.Intent
 import android.provider.Settings
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.layout.Column
@@ -27,7 +24,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
@@ -76,29 +75,9 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var events by remember { mutableStateOf<JamBaseResponse?>(null) }
     var isLoading by remember { mutableStateOf(false) }
-
-    //Internet
     val ctx = LocalContext.current
-    fun isOnline(): Boolean {
-        val connectivityManager = ctx
-            .applicationContext
-            .getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-        val capabilities =
-            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-        return capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true ||
-                capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
-    }
-    fun openWirelessSettings() {
-        val intent = Intent(Settings.ACTION_WIRELESS_SETTINGS).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        }
-        if (intent.resolveActivity(ctx.applicationContext.packageManager) != null) {
-            ctx.applicationContext.startActivity(intent)
-        }
-    }
 
     //Location
-
     val locationService = koinInject<LocationService>()
 
     val locationPermission = rememberPermission(
@@ -130,27 +109,33 @@ fun HomeScreen(
     }
 
     //Api
-    val jambaseDataSource = koinInject<JambaseSource>()
+    LaunchedEffect(Unit) {
+        if (!actions.isOnline()) {
+            actions.setShowNoInternetConnectivitySnackbar(true)
+            return@LaunchedEffect
+        }
+    }
 
+    val jambaseDataSource = koinInject<JambaseSource>()
     val coroutineScope = rememberCoroutineScope()
     fun searchEventsFromName(query: String) = coroutineScope.launch {
         lastOP = 1
         lastQuery = query
         isLoading = true
         eventList = emptyList()
-        if (isOnline()) {
+        if (actions.isOnline()) {
             try {
                 val res = jambaseDataSource.searchEvents(query, actPage)
                 events = res
                 if (res.events.isNotEmpty()) {
                     eventList = res.events
                 } else {
-                    // Handle empty results case (optional: show message or placeholder)
+                    // TODO
                 }
             } catch (e: Exception) {
-                // Handle errors gracefully (optional: show error message or retry option)
+                // TODO
             } finally {
-                isLoading = false // Set loading state to false after finishing API call
+                isLoading = false
             }
         } else {
             val res = snackbarHostState.showSnackbar(
@@ -159,10 +144,11 @@ fun HomeScreen(
                 duration = SnackbarDuration.Long
             )
             if (res == SnackbarResult.ActionPerformed) {
-                openWirelessSettings()
+                actions.openWirelessSettings()
             }
         }
     }
+
     fun searchFromCoordinates() = coroutineScope.launch {
         lastOP = 2
         isLoading = true
@@ -170,50 +156,53 @@ fun HomeScreen(
         requestLocation()
         delay(1000)
         val coordinate = locationService.coordinates
-        if (isOnline() && coordinate != null) {
-            try {
-                val res = jambaseDataSource.searchFromCoordinates(coordinate, actPage)
-                events = res
-                if (res.events.isNotEmpty()) {
-                    eventList = res.events
-                } else {
-                    // Handle empty results case (optional: show message or placeholder)
+        if(locationService.isLocationEnabled == true && coordinate != null){
+            if (actions.isOnline()) {
+                try {
+                    val res = jambaseDataSource.searchFromCoordinates(coordinate, actPage)
+                    events = res
+                    if (res.events.isNotEmpty()) {
+                        eventList = res.events
+                    } else {
+                        // TODO
+                    }
+                } catch (e: Exception) {
+                    // TODO
+                } finally {
+                    isLoading = false
                 }
-            } catch (e: Exception) {
-                // Handle errors gracefully (optional: show error message or retry option)
-            } finally {
-                isLoading = false // Set loading state to false after finishing API call
+            } else {
+                val res = snackbarHostState.showSnackbar(
+                    message = "No Internet connectivity",
+                    actionLabel = "Go to Settings",
+                    duration = SnackbarDuration.Long
+                )
+                if (res == SnackbarResult.ActionPerformed) {
+                    actions.openWirelessSettings()
+                }
             }
-        } else {
-            val res = snackbarHostState.showSnackbar(
-                message = "No Internet connectivity",
-                actionLabel = "Go to Settings",
-                duration = SnackbarDuration.Long
-            )
-            if (res == SnackbarResult.ActionPerformed) {
-                openWirelessSettings()
-            }
-        }
+        } else { isLoading = false }
     }
 
     fun getAllGenres() =  coroutineScope.launch {
-        if (isOnline()) {
+        if (actions.isOnline()) {
             try {
                 val res = jambaseDataSource.getAllGenres()
                 genreList = res.genres
             } catch (e: Exception) {
-                // Handle errors gracefully (optional: show error message or retry option)
+                // TODO
             } finally {
-                // Set loading state to false after finishing API call
+                // TODO
             }
         } else {
+            Log.d("INTERNET", "SNACK")
             val res = snackbarHostState.showSnackbar(
                 message = "No Internet connectivity",
                 actionLabel = "Go to Settings",
                 duration = SnackbarDuration.Long
             )
             if (res == SnackbarResult.ActionPerformed) {
-                openWirelessSettings()
+                actions.openWirelessSettings()
             }
         }
     }
@@ -224,7 +213,7 @@ fun HomeScreen(
         isLoading = true
         Log.d("PAGE", genre)
         eventList = emptyList()
-        if (isOnline()) {
+        if (actions.isOnline()) {
             try {
                 val res = jambaseDataSource.searchEventsFromGenre(genre, actPage)
                 events = res
@@ -232,12 +221,12 @@ fun HomeScreen(
                 if (res.events.isNotEmpty()) {
                     eventList = res.events
                 } else {
-                    // Handle empty results case (optional: show message or placeholder)
+                    // TODO
                 }
             } catch (e: Exception) {
-                // Handle errors gracefully (optional: show error message or retry option)
+                // TODO
             } finally {
-                isLoading = false // Set loading state to false after finishing API call
+                isLoading = false
             }
         } else {
             val res = snackbarHostState.showSnackbar(
@@ -246,125 +235,129 @@ fun HomeScreen(
                 duration = SnackbarDuration.Long
             )
             if (res == SnackbarResult.ActionPerformed) {
-                openWirelessSettings()
+                actions.openWirelessSettings()
             }
         }
     }
 
-    Column {
-        val searchBtn = @Composable {
-            IconButton(
-                onClick = {
-                    actPage = 1
-                    searchEventsFromName(searchInput) },
-            ) {
-                Icon(
-                    Icons.Default.Search,
-                    contentDescription = "Search events",
-                    tint = MaterialTheme.colorScheme.inverseSurface
-                )
-            }
-        }
-
-        val locaBtn = @Composable {
-            IconButton(onClick = {
-                coroutineScope.launch {
-                    actPage = 1
-                    searchFromCoordinates()
-                }
-            }) {
-                Icon(
-                    Icons.Default.LocationOn,
-                    contentDescription = "Location",
-                    tint = MaterialTheme.colorScheme.inverseSurface
-                )
-            }
-        }
-
-        OutlinedTextField(
-            value = searchInput,
-            onValueChange = { searchInput = it },
-            modifier = Modifier
-                .padding(10.dp)
-                .fillMaxWidth(),
-            placeholder = { Text(text = "Enter artist name") },
-            trailingIcon = searchBtn,
-            leadingIcon = locaBtn,
-            shape = RoundedCornerShape(20.dp)
-        )
-
-        Row(modifier = Modifier.padding(horizontal = 5.dp)) {
-            getAllGenres()
-            Text(text = "Search by genre:", modifier = Modifier.align(Alignment.CenterVertically))
-            LazyRow {
-                items(genreList) {item ->
-                    Button(onClick = { searchEventsFromGenre(item.identifier) }, modifier = Modifier.padding(5.dp)) {
-                        Text(text = item.name)
-                    }
-                }
-            }
-        }
-
-        if (state.showLocationDisabledAlert) {
-            AlertDialog(
-                title = { Text("Location disabled") },
-                text = { Text("Location must be enabled to get your current location in the app.") },
-                confirmButton = {
-                    TextButton(onClick = {
-                        locationService.openLocationSettings()
-                        actions.setShowLocationDisabledAlert(false)
-                    }) {
-                        Text("Enable")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { actions.setShowLocationDisabledAlert(false) }) {
-                        Text("Dismiss")
-                    }
-                },
-                onDismissRequest = { actions.setShowLocationDisabledAlert(false) }
-            )
-        }
-
-        if (state.showLocationPermissionDeniedAlert) {
-            AlertDialog(
-                title = { Text("Location permission denied") },
-                text = { Text("Location permission is required to get your current location in the app.") },
-                confirmButton = {
-                    TextButton(onClick = {
-                        locationPermission.launchPermissionRequest()
-                        actions.setShowLocationPermissionDeniedAlert(false)
-                    }) {
-                        Text("Grant")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { actions.setShowLocationPermissionDeniedAlert(false) }) {
-                        Text("Dismiss")
-                    }
-                },
-                onDismissRequest = { actions.setShowLocationPermissionDeniedAlert(false) }
-            )
-        }
-
-        if (state.showLocationPermissionPermanentlyDeniedSnackbar) {
-            LaunchedEffect(snackbarHostState) {
-                val res = snackbarHostState.showSnackbar(
-                    "Location permission is required.",
-                    "Go to Settings",
-                    duration = SnackbarDuration.Long
-                )
-                if (res == SnackbarResult.ActionPerformed) {
-                    ctx.startActivity(
-                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                            data = Uri.fromParts("package", ctx.packageName, null)
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        }
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    )
+    { contentPadding ->
+        Column(modifier = Modifier.padding(contentPadding)) {
+            val searchBtn = @Composable {
+                IconButton(
+                    onClick = {
+                        actPage = 1
+                        searchEventsFromName(searchInput) },
+                ) {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = "Search events",
+                        tint = MaterialTheme.colorScheme.inverseSurface
                     )
                 }
-                actions.setShowLocationPermissionPermanentlyDeniedSnackbar(false)
             }
-        }
+
+            val locaBtn = @Composable {
+                IconButton(onClick = {
+                    coroutineScope.launch {
+                        actPage = 1
+                        searchFromCoordinates()
+                    }
+                }) {
+                    Icon(
+                        Icons.Default.LocationOn,
+                        contentDescription = "Location",
+                        tint = MaterialTheme.colorScheme.inverseSurface
+                    )
+                }
+            }
+
+            OutlinedTextField(
+                value = searchInput,
+                onValueChange = { searchInput = it },
+                modifier = Modifier
+                    .padding(10.dp)
+                    .fillMaxWidth(),
+                placeholder = { Text(text = "Enter artist name") },
+                trailingIcon = searchBtn,
+                leadingIcon = locaBtn,
+                shape = RoundedCornerShape(20.dp)
+            )
+
+            Row(modifier = Modifier.padding(horizontal = 5.dp)) {
+                getAllGenres()
+                Text(text = "Search by genre:", modifier = Modifier.align(Alignment.CenterVertically))
+                LazyRow {
+                    items(genreList) {item ->
+                        Button(onClick = { searchEventsFromGenre(item.identifier) }, modifier = Modifier.padding(5.dp)) {
+                            Text(text = item.name)
+                        }
+                    }
+                }
+            }
+
+            if (state.showLocationDisabledAlert) {
+                AlertDialog(
+                    title = { Text("Location disabled") },
+                    text = { Text("Location must be enabled to get your current location in the app.") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            locationService.openLocationSettings()
+                            actions.setShowLocationDisabledAlert(false)
+                        }) {
+                            Text("Enable")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { actions.setShowLocationDisabledAlert(false) }) {
+                            Text("Dismiss")
+                        }
+                    },
+                    onDismissRequest = { actions.setShowLocationDisabledAlert(false) }
+                )
+            }
+
+            if (state.showLocationPermissionDeniedAlert) {
+                AlertDialog(
+                    title = { Text("Location permission denied") },
+                    text = { Text("Location permission is required to get your current location in the app.") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            locationPermission.launchPermissionRequest()
+                            actions.setShowLocationPermissionDeniedAlert(false)
+                        }) {
+                            Text("Grant")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { actions.setShowLocationPermissionDeniedAlert(false) }) {
+                            Text("Dismiss")
+                        }
+                    },
+                    onDismissRequest = { actions.setShowLocationPermissionDeniedAlert(false) }
+                )
+            }
+
+            if (state.showLocationPermissionPermanentlyDeniedSnackbar) {
+                LaunchedEffect(snackbarHostState) {
+                    val res = snackbarHostState.showSnackbar(
+                        "Location permission is required.",
+                        "Go to Settings",
+                        duration = SnackbarDuration.Long
+                    )
+                    if (res == SnackbarResult.ActionPerformed) {
+                        ctx.startActivity(
+                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.fromParts("package", ctx.packageName, null)
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                        )
+                    }
+                    actions.setShowLocationPermissionPermanentlyDeniedSnackbar(false)
+                }
+            }
 
             if(eventList.isNotEmpty()){
                 LazyColumn(
@@ -421,6 +414,8 @@ fun HomeScreen(
             else {
                 NoEventsFound()
             }
+
+        }
 
     }
 
