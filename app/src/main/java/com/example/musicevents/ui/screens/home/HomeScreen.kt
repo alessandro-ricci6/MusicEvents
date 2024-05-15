@@ -35,6 +35,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -54,7 +55,6 @@ import com.example.musicevents.data.remote.JambaseSource
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import com.example.musicevents.ui.composable.EventItem
-import com.example.musicevents.utils.Coordinates
 import com.example.musicevents.utils.LocationService
 import com.example.musicevents.utils.PermissionStatus
 import com.example.musicevents.utils.rememberPermission
@@ -69,10 +69,10 @@ fun HomeScreen(
     var eventList by remember { mutableStateOf<List<EventApi>>(emptyList()) }
     var genreList by remember { mutableStateOf<List<Genre>>(emptyList()) }
     var searchInput by remember { mutableStateOf("") }
-    var actPage by remember { mutableStateOf(1) }
+    var actPage by remember { mutableIntStateOf(1) }
     var lastOP: Int? = null
-    var lastQuery: String = ""
-    var lastGenre: String = ""
+    var lastQuery = ""
+    var lastGenre = ""
     val snackbarHostState = remember { SnackbarHostState() }
     var events by remember { mutableStateOf<JamBaseResponse?>(null) }
     var isLoading by remember { mutableStateOf(false) }

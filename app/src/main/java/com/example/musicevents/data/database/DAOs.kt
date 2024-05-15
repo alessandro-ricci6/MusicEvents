@@ -37,6 +37,9 @@ interface UserDAO {
     @Query("SELECT * FROM UserSaveEvent WHERE userId = :userId")
     fun getSavedEventsOfUser(userId: Int): Flow<List<UserSaveEvent>>
 
+    @Query("UPDATE User SET name = :username WHERE id = :userId")
+    fun changeUsername(username: String, userId: Int)
+
     @Upsert
     suspend fun upsert(user: User)
 }

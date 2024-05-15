@@ -1,53 +1,63 @@
 package com.example.musicevents.ui.screens.settings
 
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.musicevents.R
 import com.example.musicevents.ui.MusicEventsRoute
+import com.example.musicevents.ui.UserActions
 
 @Composable
 fun SettingsScreen(
     navHostController: NavHostController,
     action: SettingsAction,
-    themeState: ThemeState
+    themeState: ThemeState,
+    userActions: UserActions
 ) {
-    Column {
-        Demo_ExposedDropdownMenuBox(action, themeState)
+    var username by remember { mutableStateOf("") }
+    Column() {
+        ThemeDropDown(action, themeState)
+        HorizontalDivider()
+        OutlinedTextField(value = username,
+            onValueChange = {username = it},
+            label = { Text(text = "Username") },
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(5.dp),
+            trailingIcon = {
+                IconButton(onClick = {
+                    userActions.changeUsername(username)
+                }) {
+                    Icon(
+                        Icons.Default.Check,
+                        contentDescription = "Change username"
+                    )
+                }
+            })
         HorizontalDivider()
         ListItem(
             headlineContent = { TextButton(
@@ -67,7 +77,7 @@ fun SettingsScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Demo_ExposedDropdownMenuBox(
+fun ThemeDropDown(
     action: SettingsAction,
     themeState: ThemeState
 ) {
@@ -87,7 +97,7 @@ fun Demo_ExposedDropdownMenuBox(
                 expanded = !expanded
             }
         ) {
-            TextField(
+            OutlinedTextField(
                 value = selectedText,
                 onValueChange = {},
                 readOnly = true,

@@ -61,6 +61,10 @@ class UserRepository(
         return userDAO.getIdByEmail(email)
     }
 
+    suspend fun changeUsername(username: String) {
+        userDAO.changeUsername(username, id.first())
+    }
+
     suspend fun upsert(user: User){
         userDAO.upsert(user)
     }
