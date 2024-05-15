@@ -94,7 +94,7 @@ fun ThemeDropDown(
             .padding(10.dp)
     ) {
         ExposedDropdownMenuBox(
-            modifier = Modifier.height(60.dp),
+            modifier = Modifier.height(60.dp).align(Alignment.Center),
             expanded = expanded,
             onExpandedChange = {
                 expanded = !expanded

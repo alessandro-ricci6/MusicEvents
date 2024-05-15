@@ -5,10 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.musicevents.data.database.User
 import com.example.musicevents.data.database.UserSaveEvent
 import com.example.musicevents.data.repositories.UserRepository
-import com.example.musicevents.ui.screens.home.HomeState
 import com.example.musicevents.utils.InternetService
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update

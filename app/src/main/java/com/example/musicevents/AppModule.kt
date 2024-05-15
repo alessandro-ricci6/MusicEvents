@@ -8,6 +8,7 @@ import com.example.musicevents.data.database.MusicEventsDatabase
 import com.example.musicevents.data.remote.JambaseSource
 import com.example.musicevents.data.repositories.EventsRepositories
 import com.example.musicevents.data.repositories.UserRepository
+import com.example.musicevents.ui.EventViewModel
 import com.example.musicevents.ui.UserViewModel
 import com.example.musicevents.ui.screens.home.HomeViewModel
 import com.example.musicevents.ui.screens.login.LoginViewModel
@@ -69,6 +70,7 @@ val appModule = module {
     single { LocationService(get()) }
     single { InternetService(get()) }
 
+    viewModel { EventViewModel(get(), get()) }
     viewModel { LoginViewModel(get(), get()) }
     viewModel {SettingsViewModel(get())}
     viewModel {HomeViewModel(get(), get(), get())}

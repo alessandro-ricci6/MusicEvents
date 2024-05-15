@@ -46,6 +46,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat.startActivity
+import com.example.musicevents.ui.EventActions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -57,7 +58,7 @@ import java.util.TimeZone
 
 @SuppressLint("SimpleDateFormat")
 @Composable
-fun EventItem(item: EventApi, actions: HomeActions, userId: Int) {
+fun EventItem(item: EventApi, actions: EventActions, userId: Int) {
     var eventSaved by remember { mutableStateOf(actions.isEventSaved(userId, item.id)) }
     var showSheet by remember { mutableStateOf(false) }
     val icon = if(eventSaved) Icons.Default.Favorite else Icons.Default.FavoriteBorder

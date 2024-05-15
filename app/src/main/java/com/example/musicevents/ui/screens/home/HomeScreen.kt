@@ -51,6 +51,7 @@ import com.example.musicevents.data.remote.EventApi
 import com.example.musicevents.data.remote.Genre
 import com.example.musicevents.data.remote.JamBaseResponse
 import com.example.musicevents.data.remote.JambaseSource
+import com.example.musicevents.ui.EventActions
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import com.example.musicevents.ui.composable.EventItem
@@ -63,7 +64,8 @@ import kotlinx.coroutines.delay
 fun HomeScreen(
     actions: HomeActions,
     state: HomeState,
-    userId : Int
+    userId : Int,
+    eventActions: EventActions
 ){
     var eventList by remember { mutableStateOf<List<EventApi>>(emptyList()) }
     var genreList by remember { mutableStateOf<List<Genre>>(emptyList()) }
@@ -366,7 +368,7 @@ fun HomeScreen(
                         .weight(1f),
                 ) {
                     items(eventList) { item ->
-                        EventItem(item = item, actions, userId)
+                        EventItem(item = item, eventActions, userId)
                     }
                 }
                 Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
