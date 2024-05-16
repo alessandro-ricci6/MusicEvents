@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -68,14 +69,12 @@ fun HomeScreen(
     eventActions: EventActions
 ){
     var eventList by remember { mutableStateOf<List<EventApi>>(emptyList()) }
-    var genreList by remember { mutableStateOf<List<Genre>>(emptyList()) }
     var searchInput by remember { mutableStateOf("") }
     var actPage by remember { mutableIntStateOf(1) }
     var lastOP: Int? = null
     var lastQuery = ""
     var lastGenre = ""
     val snackbarHostState = remember { SnackbarHostState() }
-    var events by remember { mutableStateOf<JamBaseResponse?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     val ctx = LocalContext.current
 
@@ -112,7 +111,15 @@ fun HomeScreen(
 
     //Api
     LaunchedEffect(Unit) {
-        if (!actions.isOnline()) {
+        if (!actions.isOnline() || state.genreList.isEmpty()) {
+            val res = snackbarHostState.showSnackbar(
+                message = "No Internet connectivity",
+                actionLabel = "Go to Settings",
+                duration = SnackbarDuration.Long
+            )
+            if (res == SnackbarResult.ActionPerformed) {
+                actions.openWirelessSettings()
+            }
             actions.setShowNoInternetConnectivitySnackbar(true)
             return@LaunchedEffect
         }
@@ -128,7 +135,6 @@ fun HomeScreen(
         if (actions.isOnline()) {
             try {
                 val res = jambaseDataSource.searchEvents(query, actPage)
-                events = res
                 if (res.events.isNotEmpty()) {
                     eventList = res.events
                 } else {
@@ -162,7 +168,6 @@ fun HomeScreen(
             if (actions.isOnline()) {
                 try {
                     val res = jambaseDataSource.searchFromCoordinates(coordinate, actPage)
-                    events = res
                     if (res.events.isNotEmpty()) {
                         eventList = res.events
                     } else {
@@ -186,29 +191,6 @@ fun HomeScreen(
         } else { isLoading = false }
     }
 
-    fun getAllGenres() =  coroutineScope.launch {
-        if (actions.isOnline()) {
-            try {
-                val res = jambaseDataSource.getAllGenres()
-                genreList = res.genres
-            } catch (e: Exception) {
-                // TODO
-            } finally {
-                // TODO
-            }
-        } else {
-            Log.d("INTERNET", "SNACK")
-            val res = snackbarHostState.showSnackbar(
-                message = "No Internet connectivity",
-                actionLabel = "Go to Settings",
-                duration = SnackbarDuration.Long
-            )
-            if (res == SnackbarResult.ActionPerformed) {
-                actions.openWirelessSettings()
-            }
-        }
-    }
-
     fun searchEventsFromGenre(genre: String) = coroutineScope.launch {
         lastOP = 3
         lastGenre = genre
@@ -218,8 +200,6 @@ fun HomeScreen(
         if (actions.isOnline()) {
             try {
                 val res = jambaseDataSource.searchEventsFromGenre(genre, actPage)
-                events = res
-                Log.d("PAGE", res.events.size.toString())
                 if (res.events.isNotEmpty()) {
                     eventList = res.events
                 } else {
@@ -251,7 +231,7 @@ fun HomeScreen(
                 IconButton(
                     onClick = {
                         actPage = 1
-                        searchEventsFromName(searchInput) },
+                        searchEventsFromName(searchInput)},
                 ) {
                     Icon(
                         Icons.Default.Search,
@@ -289,10 +269,9 @@ fun HomeScreen(
             )
 
             Row(modifier = Modifier.padding(horizontal = 5.dp)) {
-                getAllGenres()
                 Text(text = "Search by genre:", modifier = Modifier.align(Alignment.CenterVertically))
                 LazyRow {
-                    items(genreList) {item ->
+                    items(state.genreList) {item ->
                         Button(onClick = { searchEventsFromGenre(item.identifier) }, modifier = Modifier.padding(5.dp)) {
                             Text(text = item.name)
                         }
@@ -414,6 +393,7 @@ fun HomeScreen(
                         .padding(top = 30.dp))
             }
             else {
+                Log.d("SEARCH", "search")
                 NoEventsFound()
             }
 

@@ -1,18 +1,25 @@
 package com.example.musicevents.ui.screens.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.musicevents.data.remote.EventApi
+import com.example.musicevents.data.remote.Genre
+import com.example.musicevents.data.remote.JambaseSource
 import com.example.musicevents.data.repositories.EventsRepositories
 import com.example.musicevents.data.repositories.UserRepository
 import com.example.musicevents.utils.InternetService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 data class HomeState(
     val showLocationDisabledAlert: Boolean = false,
     val showLocationPermissionDeniedAlert: Boolean = false,
     val showLocationPermissionPermanentlyDeniedSnackbar: Boolean = false,
-    val showNoInternetConnectivitySnackbar: Boolean = false
+    val showNoInternetConnectivitySnackbar: Boolean = false,
+    var genreList: List<Genre>
 )
 interface HomeActions{
     fun setShowLocationDisabledAlert(show: Boolean)
@@ -26,11 +33,20 @@ interface HomeActions{
 class HomeViewModel(
     private val eventsRepositories: EventsRepositories,
     private val userRepository: UserRepository,
-    private val internet: InternetService
+    private val internet: InternetService,
+    private val jambaseApi: JambaseSource
 ): ViewModel() {
 
-    private val _state = MutableStateFlow(HomeState())
+    private val _state = MutableStateFlow(HomeState(genreList = emptyList()))
     val state = _state.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            if(internet.isOnline()){
+                _state.value.genreList = jambaseApi.getAllGenres().genres
+            }
+        }
+    }
 
     val actions = object: HomeActions{
 
@@ -53,5 +69,6 @@ class HomeViewModel(
         override fun openWirelessSettings() {
             internet.openWirelessSettings()
         }
+
     }
 }

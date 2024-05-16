@@ -73,7 +73,7 @@ val appModule = module {
     viewModel { EventViewModel(get(), get()) }
     viewModel { LoginViewModel(get(), get()) }
     viewModel {SettingsViewModel(get())}
-    viewModel {HomeViewModel(get(), get(), get())}
+    viewModel {HomeViewModel(get(), get(), get(), get())}
     viewModel {ProfileViewModel(get(), get())}
     viewModel {UserViewModel(get())}
 }
