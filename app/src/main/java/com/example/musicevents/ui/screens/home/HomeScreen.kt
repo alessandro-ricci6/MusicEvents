@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,7 +34,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +42,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
@@ -49,9 +50,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.musicevents.R
 import com.example.musicevents.data.remote.EventApi
-import com.example.musicevents.data.remote.Genre
 import com.example.musicevents.data.remote.JamBaseResponse
 import com.example.musicevents.data.remote.JambaseSource
+import com.example.musicevents.data.remote.Pagination
 import com.example.musicevents.ui.EventActions
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -68,12 +69,9 @@ fun HomeScreen(
     userId : Int,
     eventActions: EventActions
 ){
-    var eventList by remember { mutableStateOf<List<EventApi>>(emptyList()) }
     var searchInput by remember { mutableStateOf("") }
-    var actPage by remember { mutableIntStateOf(1) }
-    var lastOP: Int? = null
-    var lastQuery = ""
-    var lastGenre = ""
+    var response by remember { mutableStateOf<JamBaseResponse>(JamBaseResponse(events = emptyList(), pagination = Pagination(1, null, null))) }
+    var activeGenre by remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
     var isLoading by remember { mutableStateOf(false) }
     val ctx = LocalContext.current
@@ -124,25 +122,33 @@ fun HomeScreen(
             return@LaunchedEffect
         }
     }
+    if(!actions.isOnline() || state.genreList.isEmpty()){
+        LaunchedEffect(snackbarHostState) {
+                val res = snackbarHostState.showSnackbar(
+                    message = "No Internet connectivity",
+                    actionLabel = "Go to Settings",
+                    duration = SnackbarDuration.Long
+                )
+                if (res == SnackbarResult.ActionPerformed) {
+                    actions.openWirelessSettings()
+                }
+                actions.setShowNoInternetConnectivitySnackbar(true)
+                return@LaunchedEffect
+
+        }
+    }
 
     val jambaseDataSource = koinInject<JambaseSource>()
     val coroutineScope = rememberCoroutineScope()
-    fun searchEventsFromName(query: String) = coroutineScope.launch {
-        lastOP = 1
-        lastQuery = query
+    fun searchEvents(query: String) = coroutineScope.launch {
         isLoading = true
-        eventList = emptyList()
         if (actions.isOnline()) {
             try {
-                val res = jambaseDataSource.searchEvents(query, actPage)
-                if (res.events.isNotEmpty()) {
-                    eventList = res.events
-                } else {
-                    // TODO
-                }
+                response = jambaseDataSource.searchEvents(query, activeGenre)
             } catch (e: Exception) {
                 // TODO
             } finally {
+                Log.d("PAGE", "${response.pagination.page} - ${response.pagination.nextPage} - ${response.pagination.previousPage}")
                 isLoading = false
             }
         } else {
@@ -157,22 +163,28 @@ fun HomeScreen(
         }
     }
 
-    fun searchFromCoordinates() = coroutineScope.launch {
-        lastOP = 2
+    fun searchPage(link: String) = coroutineScope.launch {
         isLoading = true
-        eventList = emptyList()
+        if(actions.isOnline()){
+            try {
+                response = jambaseDataSource.searchPage(link)
+            } catch (e: Exception) {
+                //TODO
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    fun searchFromCoordinates() = coroutineScope.launch {
+        isLoading = true
         requestLocation()
         delay(1000)
         val coordinate = locationService.coordinates
         if(locationService.isLocationEnabled == true && coordinate != null){
             if (actions.isOnline()) {
                 try {
-                    val res = jambaseDataSource.searchFromCoordinates(coordinate, actPage)
-                    if (res.events.isNotEmpty()) {
-                        eventList = res.events
-                    } else {
-                        // TODO
-                    }
+                    response = jambaseDataSource.searchFromCoordinates(coordinate, activeGenre, searchInput)
                 } catch (e: Exception) {
                     // TODO
                 } finally {
@@ -191,37 +203,6 @@ fun HomeScreen(
         } else { isLoading = false }
     }
 
-    fun searchEventsFromGenre(genre: String) = coroutineScope.launch {
-        lastOP = 3
-        lastGenre = genre
-        isLoading = true
-        Log.d("PAGE", genre)
-        eventList = emptyList()
-        if (actions.isOnline()) {
-            try {
-                val res = jambaseDataSource.searchEventsFromGenre(genre, actPage)
-                if (res.events.isNotEmpty()) {
-                    eventList = res.events
-                } else {
-                    // TODO
-                }
-            } catch (e: Exception) {
-                // TODO
-            } finally {
-                isLoading = false
-            }
-        } else {
-            val res = snackbarHostState.showSnackbar(
-                message = "No Internet connectivity",
-                actionLabel = "Go to Settings",
-                duration = SnackbarDuration.Long
-            )
-            if (res == SnackbarResult.ActionPerformed) {
-                actions.openWirelessSettings()
-            }
-        }
-    }
-
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     )
@@ -230,8 +211,7 @@ fun HomeScreen(
             val searchBtn = @Composable {
                 IconButton(
                     onClick = {
-                        actPage = 1
-                        searchEventsFromName(searchInput)},
+                        searchEvents(searchInput)},
                 ) {
                     Icon(
                         Icons.Default.Search,
@@ -244,7 +224,6 @@ fun HomeScreen(
             val locaBtn = @Composable {
                 IconButton(onClick = {
                     coroutineScope.launch {
-                        actPage = 1
                         searchFromCoordinates()
                     }
                 }) {
@@ -272,7 +251,15 @@ fun HomeScreen(
                 Text(text = "Search by genre:", modifier = Modifier.align(Alignment.CenterVertically))
                 LazyRow {
                     items(state.genreList) {item ->
-                        Button(onClick = { searchEventsFromGenre(item.identifier) }, modifier = Modifier.padding(5.dp)) {
+                        Button(onClick = {
+                            activeGenre = if(activeGenre != item.identifier){
+                                item.identifier
+                            } else { "" }},
+                            modifier = Modifier.padding(5.dp),
+                            border = ButtonDefaults.outlinedButtonBorder,
+                            colors = if(activeGenre == item.identifier) ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary, Color.White)
+                            else ButtonDefaults.buttonColors(MaterialTheme.colorScheme.tertiary, Color.Black),
+                            shape = RoundedCornerShape(20.dp)) {
                             Text(text = item.name)
                         }
                     }
@@ -340,45 +327,34 @@ fun HomeScreen(
                 }
             }
 
-            if(eventList.isNotEmpty()){
+            if(response.events.isNotEmpty()){
                 LazyColumn(
                     modifier = Modifier
                         .padding(horizontal = 10.dp, vertical = 0.dp)
                         .weight(1f),
                 ) {
-                    items(eventList) { item ->
+                    items(response.events) { item ->
                         EventItem(item = item, eventActions, userId)
                     }
                 }
                 Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    IconButton(onClick = { actPage -= 1
-                        if(lastOP == 1){
-                            searchEventsFromName(lastQuery)
-                        } else if(lastOP == 2){
-                            searchEventsFromGenre(lastGenre)
-                        } else {
-                            searchFromCoordinates()
-                        }},
-                        enabled = actPage != 1,
+                    IconButton(onClick = {
+                        searchPage(response.pagination.previousPage!!)},
+                        enabled = response.pagination.previousPage != null,
                         modifier = Modifier.align(Alignment.CenterVertically)) {
                         Icon(
                             ImageVector.vectorResource(id = R.drawable.arrow_back),
                             modifier = Modifier.size(80.dp),
                             contentDescription = "Previous Page")
                     }
-                    Text(text = actPage.toString(),
+                    Text(text = "${response.pagination.page}",
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                             .padding(horizontal = 10.dp),
                         fontSize = 20.sp)
-                    IconButton(onClick = { actPage += 1
-                        if(lastOP == 1){
-                            searchEventsFromName(lastQuery)
-                        } else if(lastOP == 2){
-                            searchEventsFromGenre(lastGenre)
-                        } else {
-                            searchFromCoordinates()
-                        }},
+                    IconButton(onClick = {
+                        searchPage(response.pagination.nextPage!!)},
+                        enabled = response.pagination.nextPage != null,
                         modifier = Modifier.align(Alignment.CenterVertically)) {
                         Icon(
                             ImageVector.vectorResource(id = R.drawable.arrow_ahead),
@@ -393,7 +369,6 @@ fun HomeScreen(
                         .padding(top = 30.dp))
             }
             else {
-                Log.d("SEARCH", "search")
                 NoEventsFound()
             }
 

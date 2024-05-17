@@ -66,9 +66,21 @@ data class EventApi(
 )
 
 @Serializable
+data class Pagination(
+    @SerialName("page")
+    val page: Int,
+    @SerialName("nextPage")
+    val nextPage: String?,
+    @SerialName("previousPage")
+    val previousPage: String?
+)
+
+@Serializable
 data class JamBaseResponse(
     @SerialName("events")
-    val events: List<EventApi>
+    var events: List<EventApi>,
+    @SerialName("pagination")
+    val pagination: Pagination
 )
 
 @Serializable
@@ -101,13 +113,13 @@ class JambaseSource(
     private val date = SimpleDateFormat("yyyy-MM-dd").format(Date())
 
 
-    suspend fun searchEvents(artistName: String, page: Int): JamBaseResponse{
-        val url = "${baseUrl}events?eventDateFrom=${date}&page=$page&perPage=10&artistName=${artistName}&apikey=${apiKey}"
+    suspend fun searchEvents(artistName: String, genre: String): JamBaseResponse{
+        val url = "${baseUrl}events?eventDateFrom=${date}&perPage=10&genreSlug=$genre&artistName=${artistName}&apikey=${apiKey}"
         return httpClient.get(url).body()
     }
 
-    suspend fun searchFromCoordinates(coordinates: Coordinates, page: Int): JamBaseResponse{
-        val url = "${baseUrl}events?eventDateFrom=${date}&page=$page&perPage=10&geoLatitude=${coordinates.latitude}&geoLongitude=${coordinates.longitude}" +
+    suspend fun searchFromCoordinates(coordinates: Coordinates, genre: String, artistName: String): JamBaseResponse{
+        val url = "${baseUrl}events?eventDateFrom=${date}&perPage=10&artistName=$artistName&genreSlug=$genre&geoLatitude=${coordinates.latitude}&geoLongitude=${coordinates.longitude}" +
                 "&geoRadiusAmount=100&geoRadiusUnits=km&apikey=${apiKey}"
         return httpClient.get(url).body()
     }
@@ -117,14 +129,12 @@ class JambaseSource(
         return httpClient.get(url).body()
     }
 
-    suspend fun searchEventsFromGenre(genre: String, page:Int): JamBaseResponse{
-        val url = "${baseUrl}events?eventDateFrom=${date}&page=$page&perPage=10&genreSlug=${genre}&apikey=${apiKey}"
-
-        return httpClient.get(url).body()
-    }
-
     suspend fun getEvent(eventId: String): SingleEvent{
         val url = "${baseUrl}events/id/${eventId}?apikey=${apiKey}"
         return httpClient.get(url).body()
+    }
+
+    suspend fun searchPage(link: String): JamBaseResponse {
+        return httpClient.get(link).body()
     }
 }
