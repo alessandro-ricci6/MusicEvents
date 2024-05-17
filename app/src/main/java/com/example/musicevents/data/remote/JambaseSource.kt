@@ -1,7 +1,6 @@
 package com.example.musicevents.data.remote
 
 import android.annotation.SuppressLint
-import android.util.Log
 import com.example.musicevents.utils.Coordinates
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

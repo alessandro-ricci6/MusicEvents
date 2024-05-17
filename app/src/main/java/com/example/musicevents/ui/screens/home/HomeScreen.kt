@@ -35,7 +35,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -70,7 +69,8 @@ fun HomeScreen(
     eventActions: EventActions
 ){
     var searchInput by remember { mutableStateOf("") }
-    var response by remember { mutableStateOf<JamBaseResponse>(JamBaseResponse(events = emptyList(), pagination = Pagination(1, null, null))) }
+    var response by remember { mutableStateOf(JamBaseResponse(events = emptyList(), pagination = Pagination(1, null, null))) }
+    var eventList by remember { mutableStateOf<List<EventApi>>(emptyList()) }
     var activeGenre by remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
     var isLoading by remember { mutableStateOf(false) }
@@ -108,20 +108,6 @@ fun HomeScreen(
     }
 
     //Api
-    LaunchedEffect(Unit) {
-        if (!actions.isOnline() || state.genreList.isEmpty()) {
-            val res = snackbarHostState.showSnackbar(
-                message = "No Internet connectivity",
-                actionLabel = "Go to Settings",
-                duration = SnackbarDuration.Long
-            )
-            if (res == SnackbarResult.ActionPerformed) {
-                actions.openWirelessSettings()
-            }
-            actions.setShowNoInternetConnectivitySnackbar(true)
-            return@LaunchedEffect
-        }
-    }
     if(!actions.isOnline() || state.genreList.isEmpty()){
         LaunchedEffect(snackbarHostState) {
                 val res = snackbarHostState.showSnackbar(
@@ -142,9 +128,11 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
     fun searchEvents(query: String) = coroutineScope.launch {
         isLoading = true
+        eventList = emptyList()
         if (actions.isOnline()) {
             try {
                 response = jambaseDataSource.searchEvents(query, activeGenre)
+                eventList = response.events
             } catch (e: Exception) {
                 // TODO
             } finally {
@@ -165,9 +153,11 @@ fun HomeScreen(
 
     fun searchPage(link: String) = coroutineScope.launch {
         isLoading = true
+        eventList = emptyList()
         if(actions.isOnline()){
             try {
                 response = jambaseDataSource.searchPage(link)
+                eventList = response.events
             } catch (e: Exception) {
                 //TODO
             } finally {
@@ -178,6 +168,7 @@ fun HomeScreen(
 
     fun searchFromCoordinates() = coroutineScope.launch {
         isLoading = true
+        eventList = emptyList()
         requestLocation()
         delay(1000)
         val coordinate = locationService.coordinates
@@ -185,6 +176,7 @@ fun HomeScreen(
             if (actions.isOnline()) {
                 try {
                     response = jambaseDataSource.searchFromCoordinates(coordinate, activeGenre, searchInput)
+                    eventList = response.events
                 } catch (e: Exception) {
                     // TODO
                 } finally {
@@ -327,13 +319,13 @@ fun HomeScreen(
                 }
             }
 
-            if(response.events.isNotEmpty()){
+            if(eventList.isNotEmpty()){
                 LazyColumn(
                     modifier = Modifier
                         .padding(horizontal = 10.dp, vertical = 0.dp)
                         .weight(1f),
                 ) {
-                    items(response.events) { item ->
+                    items(eventList) { item ->
                         EventItem(item = item, eventActions, userId)
                     }
                 }
