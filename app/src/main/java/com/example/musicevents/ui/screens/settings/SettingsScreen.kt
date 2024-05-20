@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.musicevents.data.models.Theme
 import com.example.musicevents.ui.MusicEventsRoute
 import com.example.musicevents.ui.UserActions
 
@@ -37,13 +38,12 @@ import com.example.musicevents.ui.UserActions
 fun SettingsScreen(
     navHostController: NavHostController,
     action: SettingsAction,
-    themeState: ThemeState,
     userActions: UserActions
 ) {
     var username by remember { mutableStateOf("") }
-    Scaffold(){ contentPadding ->
+    Scaffold{ contentPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
-            ThemeDropDown(action, themeState)
+            ThemeDropDown(action)
             HorizontalDivider()
             OutlinedTextField(value = username,
                 onValueChange = {username = it},
@@ -82,8 +82,7 @@ fun SettingsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ThemeDropDown(
-    action: SettingsAction,
-    themeState: ThemeState
+    action: SettingsAction
 ) {
     val themeValues = Theme.entries.toList()
     var expanded by remember { mutableStateOf(false) }

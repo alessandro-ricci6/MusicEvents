@@ -74,8 +74,7 @@ fun MusicEventsNavGraph(
         with(MusicEventsRoute.Settings) {
             composable(route) {
                 val settingVm = koinViewModel<SettingsViewModel>()
-                val themeState by settingVm.state.collectAsStateWithLifecycle()
-                SettingsScreen(navController, settingVm.actions, themeState, userVm.actions)
+                SettingsScreen(navController, settingVm.actions, userVm.actions)
             }
         }
         with(MusicEventsRoute.Profile){

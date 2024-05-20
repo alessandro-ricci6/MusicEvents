@@ -18,12 +18,12 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.musicevents.data.models.Theme
 import com.example.musicevents.ui.MusicEventsNavGraph
 import com.example.musicevents.ui.MusicEventsRoute
 import com.example.musicevents.ui.composable.NavBar
 import com.example.musicevents.ui.composable.TopBar
 import com.example.musicevents.ui.screens.settings.SettingsViewModel
-import com.example.musicevents.ui.screens.settings.Theme
 import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {

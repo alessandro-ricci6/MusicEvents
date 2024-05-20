@@ -7,6 +7,7 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import com.example.musicevents.data.database.MusicEventsDatabase
 import com.example.musicevents.data.remote.JambaseSource
 import com.example.musicevents.data.repositories.EventsRepositories
+import com.example.musicevents.data.repositories.ThemeRepository
 import com.example.musicevents.data.repositories.UserRepository
 import com.example.musicevents.ui.EventViewModel
 import com.example.musicevents.ui.UserViewModel
@@ -67,12 +68,14 @@ val appModule = module {
         )
     }
 
+    single {ThemeRepository(get())}
+
     single { LocationService(get()) }
     single { InternetService(get()) }
 
     viewModel { EventViewModel(get(), get()) }
     viewModel { LoginViewModel(get(), get()) }
-    viewModel {SettingsViewModel(get())}
+    viewModel {SettingsViewModel(get(), get())}
     viewModel {HomeViewModel(get(), get(), get(), get())}
     viewModel {ProfileViewModel(get(), get())}
     viewModel {UserViewModel(get())}

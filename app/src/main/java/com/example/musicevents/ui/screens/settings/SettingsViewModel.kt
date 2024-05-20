@@ -2,12 +2,16 @@ package com.example.musicevents.ui.screens.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.musicevents.data.models.Theme
+import com.example.musicevents.data.repositories.ThemeRepository
 import com.example.musicevents.data.repositories.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-enum class Theme {Light, Dark, System}
 data class ThemeState(val theme: Theme)
 
 interface SettingsAction{
@@ -15,11 +19,19 @@ interface SettingsAction{
     fun changeTheme(theme: Theme)
 }
 class SettingsViewModel(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val themeRepository: ThemeRepository
 ) : ViewModel(){
 
-    private val _state = MutableStateFlow(ThemeState(Theme.System))
-    val state = _state.asStateFlow()
+    val state = themeRepository.theme.map { ThemeState(theme = it) }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = ThemeState(Theme.System)
+    )
+
+    fun setTheme(theme: Theme) = viewModelScope.launch {
+        themeRepository.setTheme(theme)
+    }
 
     val actions = object: SettingsAction{
         override fun logOut() {
@@ -28,8 +40,8 @@ class SettingsViewModel(
             }
         }
 
-        override fun changeTheme(theme: Theme) {
-            _state.value = ThemeState(theme)
+        override fun changeTheme(theme: Theme){
+            setTheme(theme)
         }
     }
 }
