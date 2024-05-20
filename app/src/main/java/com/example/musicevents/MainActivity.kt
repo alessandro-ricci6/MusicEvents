@@ -1,6 +1,7 @@
 package com.example.musicevents
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -30,22 +31,19 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val settingVm = koinViewModel<SettingsViewModel>()
-            val themeState = settingVm.state.collectAsStateWithLifecycle()
-            val currentTheme = when (themeState.value.theme) {
-                Theme.Light -> false
-                Theme.Dark -> true
-                Theme.System -> isSystemInDarkTheme()
-            }
+            val themeState by settingVm.state.collectAsStateWithLifecycle()
             MusicEventsTheme(
-                darkTheme = currentTheme
+                darkTheme = when (themeState.theme) {
+                    Theme.Light -> false
+                    Theme.Dark -> true
+                    Theme.System -> isSystemInDarkTheme()
+                }
             ) {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    //HomeScreen()
-
                     val navController = rememberNavController()
                     val backStackEntry by navController.currentBackStackEntryAsState()
                     val currentRoute by remember {

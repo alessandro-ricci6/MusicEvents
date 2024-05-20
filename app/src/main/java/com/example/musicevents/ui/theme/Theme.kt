@@ -26,7 +26,6 @@ private val LightColorScheme = lightColorScheme(
     primary = LightPrimaryColor,
     secondary = LightSecondaryColor,
     tertiary = LightTertiaryColor
-
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
     surface = Color(0xFFFFFBFE),
@@ -43,7 +42,7 @@ private val LightColorScheme = lightColorScheme(
 fun MusicEventsTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = false,
+    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

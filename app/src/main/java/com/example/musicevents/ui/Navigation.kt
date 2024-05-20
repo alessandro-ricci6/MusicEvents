@@ -48,13 +48,11 @@ fun MusicEventsNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    //val placesVm = koinViewModel<PlacesViewModel>()
-    //val placesState by placesVm.state.collectAsStateWithLifecycle()
     val loginVm = koinViewModel<LoginViewModel>()
     val userState by loginVm.state.collectAsStateWithLifecycle()
     val homeVm = koinViewModel<HomeViewModel>()
     val userVm = koinViewModel<UserViewModel>()
-    val userId = userVm.userId.collectAsStateWithLifecycle().value
+    val userId by userVm.userId.collectAsStateWithLifecycle()
     val eventVm = koinViewModel<EventViewModel>()
 
     NavHost(
@@ -76,8 +74,8 @@ fun MusicEventsNavGraph(
         with(MusicEventsRoute.Settings) {
             composable(route) {
                 val settingVm = koinViewModel<SettingsViewModel>()
-                val themeState = settingVm.state.collectAsStateWithLifecycle()
-                SettingsScreen(navController, settingVm.actions, themeState.value, userVm.actions)
+                val themeState by settingVm.state.collectAsStateWithLifecycle()
+                SettingsScreen(navController, settingVm.actions, themeState, userVm.actions)
             }
         }
         with(MusicEventsRoute.Profile){
