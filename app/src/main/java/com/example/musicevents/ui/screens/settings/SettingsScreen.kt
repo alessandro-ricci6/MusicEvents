@@ -1,18 +1,14 @@
 package com.example.musicevents.ui.screens.settings
 
-import android.widget.Toast
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,12 +34,15 @@ import com.example.musicevents.ui.UserActions
 fun SettingsScreen(
     navHostController: NavHostController,
     action: SettingsAction,
-    userActions: UserActions
+    userActions: UserActions,
+    themeState: ThemeState
 ) {
     var username by remember { mutableStateOf("") }
     Scaffold{ contentPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
-            ThemeDropDown(action)
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(contentPadding)) {
+            ThemeButtons(themeState = themeState, action)
             HorizontalDivider()
             OutlinedTextField(value = username,
                 onValueChange = {username = it},
@@ -79,48 +78,18 @@ fun SettingsScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ThemeDropDown(
-    action: SettingsAction
-) {
-    val themeValues = Theme.entries.toList()
-    var expanded by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf(themeValues[0].name) }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(10.dp)
-    ) {
-        ExposedDropdownMenuBox(
-            modifier = Modifier.height(60.dp).align(Alignment.Center),
-            expanded = expanded,
-            onExpandedChange = {
-                expanded = !expanded
-            }
-        ) {
-            OutlinedTextField(
-                value = selectedText,
-                onValueChange = {},
-                readOnly = true,
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier.menuAnchor()
-            )
-
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                themeValues.forEach { item ->
-                    DropdownMenuItem(
-                        text = { Text(text = item.name) },
-                        onClick = {
-                            selectedText = item.name
-                            action.changeTheme(item)
-                            expanded = false
-                        }
-                    )
+fun ThemeButtons(themeState: ThemeState, action: SettingsAction){
+    Column {
+        Text(text = "Select the theme", modifier = Modifier.align(Alignment.CenterHorizontally).padding(5.dp))
+        Row(modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)) {
+            Theme.entries.forEach { theme ->
+                Button(onClick = { action.changeTheme(theme) },
+                    modifier = Modifier.weight(1f).padding(horizontal = 5.dp)) {
+                    Text(text = theme.name)
+                    if(themeState.theme == theme){
+                        Icon(Icons.Default.Check, contentDescription = "Selected")
+                    }
                 }
             }
         }

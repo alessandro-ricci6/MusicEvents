@@ -141,7 +141,7 @@ fun EventItem(item: EventApi, actions: EventActions, userId: Int) {
                 Icon(
                     icon,
                     contentDescription = "",
-                    tint = Color.Black
+                    tint = MaterialTheme.colorScheme.inversePrimary
                 )
             }
         }
@@ -153,7 +153,7 @@ fun EventItem(item: EventApi, actions: EventActions, userId: Int) {
             modifier = Modifier
                 .padding(10.dp)
                 .fillMaxWidth()
-                .border(BorderStroke(3.dp, Color.Black))
+                .border(BorderStroke(3.dp, MaterialTheme.colorScheme.onSurface))
         )
         Text(
             text = "In ${item.location.city.name}, ${item.location.city.county.name} on ${formatDate(item.date)}",
