@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 
 interface UserActions{
     fun changeUsername(name: String)
+    fun changeImage(imageUri: String)
 }
 
 class UserViewModel(
@@ -32,6 +33,12 @@ class UserViewModel(
         override fun changeUsername(name: String) {
             viewModelScope.launch(Dispatchers.IO) {
                 userRepository.changeUsername(name)
+            }
+        }
+
+        override fun changeImage(imageUri: String) {
+            viewModelScope.launch(Dispatchers.IO) {
+                userRepository.changeImage(imageUri)
             }
         }
     }

@@ -49,7 +49,7 @@ class LoginViewModel (
                 }
             }
             viewModelScope.launch(Dispatchers.IO) {
-                userRepository.upsert(User(name = name, password = pass, email = email))
+                userRepository.upsert(User(name = name, password = pass, email = email, imageUri = ""))
                 val id = userRepository.getIdFromEmail(email)
                 userVm.setUser(id)
             }

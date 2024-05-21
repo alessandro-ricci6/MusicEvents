@@ -1,10 +1,12 @@
 package com.example.musicevents.ui.screens.settings
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musicevents.data.models.Theme
 import com.example.musicevents.data.repositories.ThemeRepository
 import com.example.musicevents.data.repositories.UserRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,6 +19,7 @@ data class ThemeState(val theme: Theme)
 interface SettingsAction{
     fun logOut()
     fun changeTheme(theme: Theme)
+    fun setImage(image: Uri)
 }
 class SettingsViewModel(
     private val userRepository: UserRepository,
@@ -42,6 +45,12 @@ class SettingsViewModel(
 
         override fun changeTheme(theme: Theme){
             setTheme(theme)
+        }
+
+        override fun setImage(image: Uri) {
+            viewModelScope.launch(Dispatchers.IO) {
+                userRepository.changeImage(image.toString())
+            }
         }
     }
 }

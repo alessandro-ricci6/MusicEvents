@@ -1,5 +1,6 @@
 package com.example.musicevents.data.database
 
+import android.net.Uri
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -18,7 +19,10 @@ data class User (
     val password: String,
 
     @ColumnInfo
-    val email: String
+    val email: String,
+
+    @ColumnInfo
+    val imageUri: String?
 )
 
 @Entity

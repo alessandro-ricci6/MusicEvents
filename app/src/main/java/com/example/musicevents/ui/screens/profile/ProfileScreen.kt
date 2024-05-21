@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.layout.ContentScale
 import com.example.musicevents.data.remote.EventApi
 import com.example.musicevents.data.remote.JambaseSource
 import com.example.musicevents.ui.EventActions
@@ -91,12 +92,13 @@ fun ProfileScreen(
                 .padding(contentPadding)
                 .fillMaxSize()
         ) {
-            AsyncImage(model = R.drawable.def_profile, contentDescription = "Profile Image",
+            AsyncImage(model = if(user.imageUri.isNullOrEmpty()){R.drawable.def_profile}else{user.imageUri}, contentDescription = "Profile Image",
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(10.dp)
                     .clip(CircleShape)
-                    .size(120.dp))
+                    .size(120.dp),
+                contentScale = ContentScale.Crop)
             Text(text = user.name, modifier = Modifier.align(Alignment.CenterHorizontally))
 
             if(eventList.isNotEmpty()){

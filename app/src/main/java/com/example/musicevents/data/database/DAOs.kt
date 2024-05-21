@@ -40,6 +40,9 @@ interface UserDAO {
     @Query("UPDATE User SET name = :username WHERE id = :userId")
     fun changeUsername(username: String, userId: Int)
 
+    @Query("UPDATE User SET imageUri = :imageUri WHERE id = :userId")
+    fun changeImage(imageUri: String, userId: Int)
+
     @Upsert
     suspend fun upsert(user: User)
 }

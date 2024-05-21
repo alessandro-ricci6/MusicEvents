@@ -69,4 +69,8 @@ class UserRepository(
         userDAO.upsert(user)
     }
 
+    suspend fun changeImage(image: String){
+        userDAO.changeImage(image, id.first())
+    }
+
 }
