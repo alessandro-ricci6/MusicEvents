@@ -57,7 +57,7 @@ fun MusicEventsNavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = if (userId != 0) MusicEventsRoute.Home.route else MusicEventsRoute.Login.route,
+        startDestination = if (userId == 0) MusicEventsRoute.Login.route else MusicEventsRoute.Home.route,
         modifier = modifier
     ){
         with(MusicEventsRoute.Home) {

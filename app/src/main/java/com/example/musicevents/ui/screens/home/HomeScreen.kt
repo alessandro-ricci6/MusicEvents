@@ -170,7 +170,7 @@ fun HomeScreen(
         isLoading = true
         eventList = emptyList()
         requestLocation()
-        delay(1000)
+        delay(1500)
         val coordinate = locationService.coordinates
         if(locationService.isLocationEnabled == true && coordinate != null){
             if (actions.isOnline()) {
