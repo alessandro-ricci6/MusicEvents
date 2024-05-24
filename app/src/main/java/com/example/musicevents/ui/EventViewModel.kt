@@ -1,6 +1,5 @@
 package com.example.musicevents.ui
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musicevents.data.repositories.EventsRepositories
@@ -28,7 +27,6 @@ class EventViewModel(
 
         override fun isEventSaved(userId: Int, eventId: String): Boolean {
             val result = runBlocking { eventRepository.isEventSaved(userId, eventId) }
-            Log.d("RESULT", result.toString())
             return result
         }
 

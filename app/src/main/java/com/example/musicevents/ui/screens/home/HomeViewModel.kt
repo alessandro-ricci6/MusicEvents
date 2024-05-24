@@ -1,9 +1,7 @@
 package com.example.musicevents.ui.screens.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.musicevents.data.remote.EventApi
 import com.example.musicevents.data.remote.Genre
 import com.example.musicevents.data.remote.JambaseSource
 import com.example.musicevents.data.repositories.EventsRepositories
@@ -31,8 +29,6 @@ interface HomeActions{
 }
 
 class HomeViewModel(
-    private val eventsRepositories: EventsRepositories,
-    private val userRepository: UserRepository,
     private val internet: InternetService,
     private val jambaseApi: JambaseSource
 ): ViewModel() {

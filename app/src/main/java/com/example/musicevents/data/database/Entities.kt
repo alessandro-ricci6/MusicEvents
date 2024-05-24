@@ -1,11 +1,8 @@
 package com.example.musicevents.data.database
 
-import android.net.Uri
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
 
 @Entity
 data class User (

@@ -1,6 +1,8 @@
 package com.example.musicevents.ui.screens.profile
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.musicevents.R
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -97,7 +100,8 @@ fun ProfileScreen(
                     .align(Alignment.CenterHorizontally)
                     .padding(10.dp)
                     .clip(CircleShape)
-                    .size(120.dp),
+                    .size(120.dp)
+                    .border(BorderStroke(3.dp, MaterialTheme.colorScheme.onSurface), CircleShape),
                 contentScale = ContentScale.Crop)
             Text(text = user.name, modifier = Modifier.align(Alignment.CenterHorizontally))
 

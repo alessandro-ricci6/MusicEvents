@@ -134,7 +134,7 @@ fun HomeScreen(
                 response = jambaseDataSource.searchEvents(query, activeGenre)
                 eventList = response.events
             } catch (e: Exception) {
-                // TODO
+                Log.d("ERROR", e.message.toString())
             } finally {
                 Log.d("PAGE", "${response.pagination.page} - ${response.pagination.nextPage} - ${response.pagination.previousPage}")
                 isLoading = false
@@ -159,7 +159,7 @@ fun HomeScreen(
                 response = jambaseDataSource.searchPage(link)
                 eventList = response.events
             } catch (e: Exception) {
-                //TODO
+                Log.d("ERROR", e.message.toString())
             } finally {
                 isLoading = false
             }
@@ -178,7 +178,7 @@ fun HomeScreen(
                     response = jambaseDataSource.searchFromCoordinates(coordinate, activeGenre, searchInput)
                     eventList = response.events
                 } catch (e: Exception) {
-                    // TODO
+                    Log.d("ERROR", e.message.toString())
                 } finally {
                     isLoading = false
                 }

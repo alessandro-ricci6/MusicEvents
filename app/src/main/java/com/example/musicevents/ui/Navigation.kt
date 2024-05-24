@@ -49,7 +49,6 @@ fun MusicEventsNavGraph(
     modifier: Modifier = Modifier
 ) {
     val loginVm = koinViewModel<LoginViewModel>()
-    val userState by loginVm.state.collectAsStateWithLifecycle()
     val homeVm = koinViewModel<HomeViewModel>()
     val userVm = koinViewModel<UserViewModel>()
     val userId by userVm.userId.collectAsStateWithLifecycle()
@@ -68,7 +67,7 @@ fun MusicEventsNavGraph(
         }
         with(MusicEventsRoute.Login) {
             composable(route) {
-                LoginScreen(navController, userState, loginVm.actions)
+                LoginScreen(navController, loginVm.actions)
             }
         }
         with(MusicEventsRoute.Settings) {

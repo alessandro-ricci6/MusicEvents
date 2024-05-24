@@ -33,7 +33,6 @@ import com.example.musicevents.ui.MusicEventsRoute
 @Composable
 fun LoginScreen(
     navHostController: NavHostController,
-    state: UserState,
     actions: LoginActions
 ){
     Scaffold {contentPadding ->
@@ -44,7 +43,7 @@ fun LoginScreen(
                 .fillMaxSize()
                 .padding(contentPadding)
         ) {
-            LoginDiv(navHostController, state, actions)
+            LoginDiv(navHostController, actions)
             RegisterScreen(navHostController, actions)
 
         }
@@ -54,7 +53,6 @@ fun LoginScreen(
 @Composable
 fun LoginDiv(
     navController: NavHostController,
-    state: UserState,
     actions: LoginActions
 ){
     var email by remember { mutableStateOf("") }
@@ -99,7 +97,6 @@ fun LoginDiv(
         } else {
             resultText = "Try again"
         }
-        //resultText = if(LoginViewModel().onLoginClick(name, password))"Hello $name" else "Try again"
     }) {
         Text(text = "Login")
     }
@@ -160,8 +157,6 @@ fun RegisterScreen(
         } else {
             resultText = "User yet registered"
         }
-
-        //resultText = if(LoginViewModel().onRegisterClick(name, password, email)) "Hello $email" else "Try again"
     }) {
         Text(text = "Register")
     }

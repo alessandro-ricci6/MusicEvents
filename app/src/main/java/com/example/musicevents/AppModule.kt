@@ -35,7 +35,6 @@ val appModule = module {
             MusicEventsDatabase::class.java,
             "music-events"
         )
-            // Sconsigliato per progetti seri! Lo usiamo solo qui per semplicità
             .fallbackToDestructiveMigration()
             .build()
     }
@@ -55,16 +54,13 @@ val appModule = module {
     single {
         UserRepository(
             get<MusicEventsDatabase>().userDAO(),
-            get<Context>().applicationContext.contentResolver,
             get()
         )
     }
 
     single {
         EventsRepositories(
-            get<MusicEventsDatabase>().eventsDAO(),
-            get<Context>().applicationContext.contentResolver,
-            get()
+            get<MusicEventsDatabase>().eventsDAO()
         )
     }
 
@@ -76,7 +72,7 @@ val appModule = module {
     viewModel { EventViewModel(get(), get()) }
     viewModel { LoginViewModel(get(), get()) }
     viewModel {SettingsViewModel(get(), get())}
-    viewModel {HomeViewModel(get(), get(), get(), get())}
+    viewModel {HomeViewModel(get(), get())}
     viewModel {ProfileViewModel(get(), get())}
     viewModel {UserViewModel(get())}
 }
