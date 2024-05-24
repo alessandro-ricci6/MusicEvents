@@ -91,9 +91,7 @@ fun EventItem(item: EventApi, actions: EventActions, userId: Int) {
     }
 
     fun formatDate(dateString: String): String {
-        Log.d("DATE1", dateString)
         if(dateString.length > 11){
-            Log.d("DATE2", dateString)
             val newDate = LocalDateTime.parse(dateString, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
             return newDate.format(DateTimeFormatter.ofPattern("EEEE yyyy-MM-dd 'at' HH:mm"))
         }
@@ -113,7 +111,7 @@ fun EventItem(item: EventApi, actions: EventActions, userId: Int) {
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
-        border = BorderStroke(1.dp, Color.Black),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface),
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 15.dp)
@@ -141,7 +139,7 @@ fun EventItem(item: EventApi, actions: EventActions, userId: Int) {
                 Icon(
                     icon,
                     contentDescription = "",
-                    tint = MaterialTheme.colorScheme.inversePrimary
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
