@@ -1,12 +1,16 @@
 package com.example.musicevents.ui.screens.login
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musicevents.data.database.User
 import com.example.musicevents.data.repositories.UserRepository
 import com.example.musicevents.ui.UserViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -24,11 +28,16 @@ class LoginViewModel (
     private val userRepository: UserRepository,
     private val userVm: UserViewModel
 ): ViewModel() {
-    var state = userRepository.users.map { UserState(users = it) }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = UserState(emptyList())
-    )
+    private val _state = MutableStateFlow(UserState(emptyList()))
+    val state = _state.asStateFlow()
+
+
+    init {
+        viewModelScope.launch {
+            _state.value = UserState(userRepository.users.first())
+        }
+    }
+
 
     val actions = object: LoginActions {
 

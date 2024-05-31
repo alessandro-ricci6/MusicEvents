@@ -118,7 +118,7 @@ class JambaseSource(
     }
 
     suspend fun searchFromCoordinates(coordinates: Coordinates, genre: String, artistName: String): JamBaseResponse{
-        val url = "${baseUrl}events?eventDateFrom=${date}&perPage=10&artistName=$artistName&genreSlug=$genre&geoLatitude=${coordinates.latitude}&geoLongitude=${coordinates.longitude}" +
+        val url = "${baseUrl}events?geoRadiusAmount=200&geoRadiusUnits=km&eventDateFrom=${date}&perPage=10&artistName=$artistName&genreSlug=$genre&geoLatitude=${coordinates.latitude}&geoLongitude=${coordinates.longitude}" +
                 "&geoRadiusAmount=100&geoRadiusUnits=km&apikey=${apiKey}"
         return httpClient.get(url).body()
     }
