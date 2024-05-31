@@ -1,6 +1,5 @@
 package com.example.musicevents.ui.screens.login
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musicevents.data.database.User
@@ -16,7 +15,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 //Data class
-data class UserState(val users: List<User>)
+data class UserState(var users: List<User>)
 
 //Action interface
 interface LoginActions {
@@ -28,16 +27,15 @@ class LoginViewModel (
     private val userRepository: UserRepository,
     private val userVm: UserViewModel
 ): ViewModel() {
-    private val _state = MutableStateFlow(UserState(emptyList()))
-    val state = _state.asStateFlow()
 
+    private val _state = MutableStateFlow(UserState(users = emptyList()))
+    val state = _state.asStateFlow()
 
     init {
         viewModelScope.launch {
-            _state.value = UserState(userRepository.users.first())
+            _state.value.users = userRepository.users.first()
         }
     }
-
 
     val actions = object: LoginActions {
 
