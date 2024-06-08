@@ -2,8 +2,10 @@ package com.example.musicevents.ui
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -38,8 +40,12 @@ sealed class MusicEventsRoute(
     //data object Profile :
     data object Profile: MusicEventsRoute("profile", "Profile", Icons.Outlined.Person)
 
+    data object EventDetail: MusicEventsRoute("eventDetail", "Event Detail", Icons.Outlined.Info)
+
+    data object VenueDetail: MusicEventsRoute("venueDetail", "Venue Detail", Icons.Outlined.Place)
+
     companion object {
-        val routes = setOf(Login, Home, Settings, Profile)
+        val routes = setOf(Login, Home, Settings, Profile, EventDetail, VenueDetail)
     }
 }
 

@@ -40,6 +40,7 @@ import coil.compose.AsyncImage
 import com.example.musicevents.data.remote.EventApi
 import com.example.musicevents.data.remote.Performer
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import com.example.musicevents.ui.EventActions
@@ -100,11 +101,10 @@ fun EventItem(item: EventApi, actions: EventActions, userId: Int) {
         BottomSheet (onDismiss = { showSheet = false }, performerList = item.performer)
     }
 
-    OutlinedCard(
+    Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface),
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 15.dp)
